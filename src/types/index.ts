@@ -1,4 +1,4 @@
-export type Screen = 'home' | 'contacts' | 'messages' | 'medications' | 'emergency' | 'settings'
+export type Screen = 'dashboard' | 'contacts' | 'messages' | 'medications' | 'emergency' | 'settings'
 
 export interface Contact {
   id: string
@@ -9,20 +9,24 @@ export interface Contact {
   order: number
 }
 
+export interface MedicationDose {
+  time: string       // "08:00"
+  taken: boolean
+}
+
 export interface Medication {
   id: string
   name: string
   photo: string | null
-  schedule: ('morning' | 'noon' | 'evening')[]
-  takenToday: { morning: boolean; noon: boolean; evening: boolean }
+  barcode: string | null
+  frequency: 1 | 2 | 3
+  doses: MedicationDose[]   // e.g. [{ time: "08:00", taken: false }, { time: "20:00", taken: false }]
+  dosage: string            // e.g. "1 Tablette"
   notes: string
-  lastTakenDate: string | null
+  lastResetDate: string | null
 }
 
 export interface ReminderSettings {
-  morningTime: string
-  noonTime: string
-  eveningTime: string
   okReminderTime: string
 }
 
@@ -31,6 +35,22 @@ export interface AppState {
   medications: Medication[]
   userName: string
   reminders: ReminderSettings
+  weatherCity: string
   settingsUnlocked: boolean
   adminPin: string
+}
+
+export interface WeatherData {
+  temp: number
+  feels_like: number
+  description: string
+  icon: string
+  city: string
+}
+
+export interface NewsItem {
+  title: string
+  link: string
+  pubDate: string
+  description: string
 }

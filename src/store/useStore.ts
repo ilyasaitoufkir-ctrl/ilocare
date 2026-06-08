@@ -1,27 +1,20 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { AppState, Contact, Medication } from '../types'
+import type { AppState, Contact, Medication, MedicationDose } from '../types'
 
-const STORAGE_KEY = 'ilocare_data'
+const STORAGE_KEY = 'ilocare_v2'
+
+function defaultDoses(frequency: 1 | 2 | 3): MedicationDose[] {
+  if (frequency === 1) return [{ time: '08:00', taken: false }]
+  if (frequency === 2) return [{ time: '08:00', taken: false }, { time: '20:00', taken: false }]
+  return [{ time: '08:00', taken: false }, { time: '14:00', taken: false }, { time: '20:00', taken: false }]
+}
 
 const defaultState: AppState = {
-  contacts: [
-    {
-      id: '1',
-      name: 'Familie',
-      phone: '',
-      photo: null,
-      isEmergency: true,
-      order: 0,
-    },
-  ],
+  contacts: [],
   medications: [],
   userName: 'Ilyas',
-  reminders: {
-    morningTime: '08:00',
-    noonTime: '12:00',
-    eveningTime: '20:00',
-    okReminderTime: '19:00',
-  },
+  reminders: { okReminderTime: '19:00' },
+  weatherCity: 'Berlin',
   settingsUnlocked: false,
   adminPin: '1234',
 }
@@ -30,8 +23,7 @@ function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultState
-    const parsed = JSON.parse(raw)
-    return { ...defaultState, ...parsed, settingsUnlocked: false }
+    return { ...defaultState, ...JSON.parse(raw), settingsUnlocked: false }
   } catch {
     return defaultState
   }
@@ -39,7 +31,7 @@ function loadState(): AppState {
 
 function saveState(state: AppState) {
   try {
-    const { settingsUnlocked: _, ...toSave } = state
+    const { settingsUnlocked: _s, ...toSave } = state
     localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave))
   } catch { /* ignore */ }
 }
@@ -47,87 +39,83 @@ function saveState(state: AppState) {
 export function useStore() {
   const [state, setState] = useState<AppState>(loadState)
 
-  useEffect(() => {
-    saveState(state)
-  }, [state])
+  useEffect(() => { saveState(state) }, [state])
 
   const updateState = useCallback((updater: (s: AppState) => AppState) => {
     setState(prev => updater(prev))
   }, [])
 
+  // ── Contacts ──────────────────────────────────────────────────────────────
   const addContact = useCallback((contact: Omit<Contact, 'id' | 'order'>) => {
     updateState(s => ({
       ...s,
-      contacts: [
-        ...s.contacts,
-        { ...contact, id: Date.now().toString(), order: s.contacts.length },
-      ].slice(0, 5),
+      contacts: [...s.contacts, { ...contact, id: Date.now().toString(), order: s.contacts.length }].slice(0, 5),
     }))
   }, [updateState])
 
   const updateContact = useCallback((id: string, data: Partial<Contact>) => {
-    updateState(s => ({
-      ...s,
-      contacts: s.contacts.map(c => c.id === id ? { ...c, ...data } : c),
-    }))
+    updateState(s => ({ ...s, contacts: s.contacts.map(c => c.id === id ? { ...c, ...data } : c) }))
   }, [updateState])
 
   const deleteContact = useCallback((id: string) => {
     updateState(s => ({ ...s, contacts: s.contacts.filter(c => c.id !== id) }))
   }, [updateState])
 
-  const addMedication = useCallback((med: Omit<Medication, 'id' | 'takenToday' | 'lastTakenDate'>) => {
+  // ── Medications ───────────────────────────────────────────────────────────
+  const addMedication = useCallback((med: {
+    name: string
+    photo: string | null
+    barcode: string | null
+    frequency: 1 | 2 | 3
+    doses: MedicationDose[]
+    dosage: string
+    notes: string
+  }) => {
     updateState(s => ({
       ...s,
-      medications: [
-        ...s.medications,
-        {
-          ...med,
-          id: Date.now().toString(),
-          takenToday: { morning: false, noon: false, evening: false },
-          lastTakenDate: null,
-        },
-      ],
+      medications: [...s.medications, {
+        ...med,
+        id: Date.now().toString(),
+        lastResetDate: new Date().toDateString(),
+      }],
     }))
   }, [updateState])
 
   const updateMedication = useCallback((id: string, data: Partial<Medication>) => {
-    updateState(s => ({
-      ...s,
-      medications: s.medications.map(m => m.id === id ? { ...m, ...data } : m),
-    }))
+    updateState(s => ({ ...s, medications: s.medications.map(m => m.id === id ? { ...m, ...data } : m) }))
   }, [updateState])
 
   const deleteMedication = useCallback((id: string) => {
     updateState(s => ({ ...s, medications: s.medications.filter(m => m.id !== id) }))
   }, [updateState])
 
-  const markMedicationTaken = useCallback((id: string, time: 'morning' | 'noon' | 'evening') => {
+  const markDoseTaken = useCallback((medId: string, doseIndex: number) => {
+    updateState(s => ({
+      ...s,
+      medications: s.medications.map(m => {
+        if (m.id !== medId) return m
+        const doses = m.doses.map((d, i) => i === doseIndex ? { ...d, taken: true } : d)
+        return { ...m, doses }
+      }),
+    }))
+  }, [updateState])
+
+  const resetDailyDoses = useCallback(() => {
     const today = new Date().toDateString()
     updateState(s => ({
       ...s,
-      medications: s.medications.map(m =>
-        m.id === id
-          ? {
-              ...m,
-              takenToday: { ...m.takenToday, [time]: true },
-              lastTakenDate: today,
-            }
-          : m
-      ),
+      medications: s.medications.map(m => {
+        if (m.lastResetDate === today) return m
+        return {
+          ...m,
+          doses: m.doses.map(d => ({ ...d, taken: false })),
+          lastResetDate: today,
+        }
+      }),
     }))
   }, [updateState])
 
-  const resetDailyMedications = useCallback(() => {
-    updateState(s => ({
-      ...s,
-      medications: s.medications.map(m => ({
-        ...m,
-        takenToday: { morning: false, noon: false, evening: false },
-      })),
-    }))
-  }, [updateState])
-
+  // ── Settings ──────────────────────────────────────────────────────────────
   const unlockSettings = useCallback((pin: string): boolean => {
     if (pin === state.adminPin) {
       setState(s => ({ ...s, settingsUnlocked: true }))
@@ -142,16 +130,12 @@ export function useStore() {
 
   return {
     state,
-    addContact,
-    updateContact,
-    deleteContact,
-    addMedication,
-    updateMedication,
-    deleteMedication,
-    markMedicationTaken,
-    resetDailyMedications,
-    unlockSettings,
-    lockSettings,
     updateState,
+    addContact, updateContact, deleteContact,
+    addMedication, updateMedication, deleteMedication, markDoseTaken, resetDailyDoses,
+    unlockSettings, lockSettings,
+    defaultDoses,
   }
 }
+
+export { defaultDoses }

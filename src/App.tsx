@@ -1,90 +1,81 @@
 import React, { useEffect } from 'react'
+import { useState } from 'react'
 import { useStore } from './store/useStore'
-import { HomeScreen } from './screens/HomeScreen'
+import { DashboardScreen } from './screens/DashboardScreen'
 import { ContactsScreen } from './screens/ContactsScreen'
 import { MessagesScreen } from './screens/MessagesScreen'
 import { MedicationsScreen } from './screens/MedicationsScreen'
 import { EmergencyScreen } from './screens/EmergencyScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
 import type { Screen } from './types'
-import { useState } from 'react'
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>('home')
-  const [messageContactId, setMessageContactId] = useState<string | null>(null)
-
+  const [screen, setScreen] = useState<Screen>('dashboard')
+  const [msgContactId, setMsgContactId] = useState<string | null>(null)
   const store = useStore()
 
-  // Reset daily medications at midnight
+  // Reset medication doses at midnight
   useEffect(() => {
-    const lastReset = localStorage.getItem('ilocare_last_reset')
-    const today = new Date().toDateString()
-    if (lastReset !== today) {
-      store.resetDailyMedications()
-      localStorage.setItem('ilocare_last_reset', today)
-    }
+    store.resetDailyDoses()
+    const id = setInterval(() => store.resetDailyDoses(), 60 * 1000)
+    return () => clearInterval(id)
   }, [])
 
-  // Web Push Notifications (requests permission)
+  // Request notification permission
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission()
     }
   }, [])
 
-  // Schedule notifications based on reminder times
+  // Schedule medication + OK reminders
   useEffect(() => {
     if (!('Notification' in window) || Notification.permission !== 'granted') return
 
-    const { morningTime, noonTime, eveningTime, okReminderTime } = store.state.reminders
+    const timers: ReturnType<typeof setTimeout>[] = []
 
-    function scheduleDaily(timeStr: string, message: string) {
+    function scheduleAt(timeStr: string, title: string, body: string) {
       const [h, m] = timeStr.split(':').map(Number)
       const now = new Date()
       const target = new Date()
       target.setHours(h, m, 0, 0)
       if (target <= now) target.setDate(target.getDate() + 1)
       const delay = target.getTime() - now.getTime()
-      return setTimeout(() => {
-        new Notification('ilocare', { body: message, icon: '/icons/icon-192.png' })
-      }, delay)
+      timers.push(setTimeout(() => {
+        new Notification(title, { body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png' })
+      }, delay))
     }
 
-    const timers = [
-      scheduleDaily(morningTime, `☀️ Guten Morgen! Vergiss deine Medikamente nicht 💊`),
-      scheduleDaily(noonTime, `💊 Zeit für deine Mittags-Medikamente!`),
-      scheduleDaily(eveningTime, `🌙 Abend-Medikamente nicht vergessen!`),
-      scheduleDaily(okReminderTime, `✅ Hast du heute deinen OK-Button gedrückt?`),
-    ]
+    // OK reminder
+    scheduleAt(store.state.reminders.okReminderTime, 'ilocare', '✅ Hast du heute deinen OK-Button gedrückt?')
+
+    // Medication reminders
+    for (const med of store.state.medications) {
+      for (const dose of med.doses) {
+        if (!dose.taken) {
+          scheduleAt(dose.time, `💊 Medikament`, `Zeit für ${med.name} – ${med.dosage}`)
+        }
+      }
+    }
 
     return () => timers.forEach(clearTimeout)
-  }, [store.state.reminders])
+  }, [store.state.medications, store.state.reminders])
 
   function navigate(s: Screen, contactId?: string) {
-    if (s === 'messages' && contactId) {
-      setMessageContactId(contactId)
-    } else {
-      setMessageContactId(null)
-    }
+    setMsgContactId(contactId ?? null)
     setScreen(s)
   }
 
   if (screen === 'contacts') {
-    return (
-      <ContactsScreen
-        contacts={store.state.contacts}
-        onBack={() => setScreen('home')}
-        onNavigate={navigate}
-      />
-    )
+    return <ContactsScreen contacts={store.state.contacts} onBack={() => setScreen('dashboard')} />
   }
 
   if (screen === 'messages') {
     return (
       <MessagesScreen
         contacts={store.state.contacts}
-        initialContactId={messageContactId}
-        onBack={() => setScreen('home')}
+        initialContactId={msgContactId}
+        onBack={() => setScreen('dashboard')}
       />
     )
   }
@@ -93,8 +84,8 @@ export default function App() {
     return (
       <MedicationsScreen
         medications={store.state.medications}
-        onTaken={store.markMedicationTaken}
-        onBack={() => setScreen('home')}
+        onTaken={store.markDoseTaken}
+        onBack={() => setScreen('dashboard')}
       />
     )
   }
@@ -104,7 +95,7 @@ export default function App() {
       <EmergencyScreen
         contacts={store.state.contacts}
         userName={store.state.userName}
-        onBack={() => setScreen('home')}
+        onBack={() => setScreen('dashboard')}
       />
     )
   }
@@ -113,11 +104,10 @@ export default function App() {
     return (
       <SettingsScreen
         state={store.state}
-        onBack={() => setScreen('home')}
+        onBack={() => setScreen('dashboard')}
         unlockSettings={store.unlockSettings}
         lockSettings={store.lockSettings}
         addContact={store.addContact}
-        updateContact={store.updateContact}
         deleteContact={store.deleteContact}
         addMedication={store.addMedication}
         deleteMedication={store.deleteMedication}
@@ -127,9 +117,12 @@ export default function App() {
   }
 
   return (
-    <HomeScreen
-      onNavigate={navigate}
+    <DashboardScreen
       userName={store.state.userName}
+      weatherCity={store.state.weatherCity}
+      medications={store.state.medications}
+      contacts={store.state.contacts}
+      onNavigate={navigate}
     />
   )
 }

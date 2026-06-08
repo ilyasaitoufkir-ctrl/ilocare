@@ -1,128 +1,254 @@
-import React, { useEffect } from 'react'
-import { useState } from 'react'
+import React, { useEffect, useState, useCallback } from 'react'
 import { useStore } from './store/useStore'
+import { useFallDetection } from './hooks/useFallDetection'
+import { useGeofencing } from './hooks/useGeofencing'
+import { useCheckIn } from './hooks/useCheckIn'
 import { DashboardScreen } from './screens/DashboardScreen'
 import { ContactsScreen } from './screens/ContactsScreen'
 import { MessagesScreen } from './screens/MessagesScreen'
 import { MedicationsScreen } from './screens/MedicationsScreen'
 import { EmergencyScreen } from './screens/EmergencyScreen'
 import { SettingsScreen } from './screens/SettingsScreen'
-import type { Screen } from './types'
+import { InsuranceCardScreen } from './screens/InsuranceCardScreen'
+import { ShoppingScreen } from './screens/ShoppingScreen'
+import { DoctorsScreen } from './screens/DoctorsScreen'
+import { LocationScreen } from './screens/LocationScreen'
+import { FallAlert } from './components/FallAlert'
+import { CheckInAlert } from './components/CheckInAlert'
+import { NightModeAlert } from './components/NightModeAlert'
+import type { Screen, SavedLocation } from './types'
+
+function isNightTime(startTime: string, endTime: string): boolean {
+  const now = new Date()
+  const nowMins = now.getHours() * 60 + now.getMinutes()
+  const [sh, sm] = startTime.split(':').map(Number)
+  const [eh, em] = endTime.split(':').map(Number)
+  const startMins = sh * 60 + sm
+  const endMins = eh * 60 + em
+  if (startMins > endMins) {
+    return nowMins >= startMins || nowMins < endMins
+  }
+  return nowMins >= startMins && nowMins < endMins
+}
+
+function getCurrentTime() {
+  return new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+}
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('dashboard')
   const [msgContactId, setMsgContactId] = useState<string | null>(null)
+  const [nightAlertShown, setNightAlertShown] = useState(false)
+  const [fallDetectionEnabled, setFallDetectionEnabled] = useState(false)
   const store = useStore()
 
-  // Reset medication doses at midnight
+  // ── Daily medication reset ────────────────────────────────────────────────
   useEffect(() => {
     store.resetDailyDoses()
     const id = setInterval(() => store.resetDailyDoses(), 60 * 1000)
     return () => clearInterval(id)
   }, [])
 
-  // Request notification permission
+  // ── Notification permission ────────────────────────────────────────────────
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'default') {
       Notification.requestPermission()
     }
   }, [])
 
-  // Schedule medication + OK reminders
+  // ── Medication & OK push notifications ────────────────────────────────────
   useEffect(() => {
     if (!('Notification' in window) || Notification.permission !== 'granted') return
-
     const timers: ReturnType<typeof setTimeout>[] = []
-
-    function scheduleAt(timeStr: string, title: string, body: string) {
-      const [h, m] = timeStr.split(':').map(Number)
-      const now = new Date()
-      const target = new Date()
+    function scheduleAt(t: string, title: string, body: string) {
+      const [h, m] = t.split(':').map(Number)
+      const now = new Date(); const target = new Date()
       target.setHours(h, m, 0, 0)
       if (target <= now) target.setDate(target.getDate() + 1)
-      const delay = target.getTime() - now.getTime()
-      timers.push(setTimeout(() => {
-        new Notification(title, { body, icon: '/icons/icon-192.png', badge: '/icons/icon-192.png' })
-      }, delay))
+      timers.push(setTimeout(() => new Notification(title, { body, icon: '/icons/icon-192.png' }), target.getTime() - now.getTime()))
     }
-
-    // OK reminder
     scheduleAt(store.state.reminders.okReminderTime, 'ilocare', '✅ Hast du heute deinen OK-Button gedrückt?')
-
-    // Medication reminders
+    if (store.state.reminders.checkIn.enabled) {
+      scheduleAt(store.state.reminders.checkIn.time, 'ilocare 👋', `Guten Morgen, ${store.state.userName}! Bitte Check-in bestätigen.`)
+    }
     for (const med of store.state.medications) {
       for (const dose of med.doses) {
-        if (!dose.taken) {
-          scheduleAt(dose.time, `💊 Medikament`, `Zeit für ${med.name} – ${med.dosage}`)
-        }
+        if (!dose.taken) scheduleAt(dose.time, '💊 Medikament', `Zeit für ${med.name} – ${med.dosage}`)
       }
     }
-
     return () => timers.forEach(clearTimeout)
-  }, [store.state.medications, store.state.reminders])
+  }, [store.state.medications, store.state.reminders, store.state.userName])
+
+  // ── Night Mode alert ──────────────────────────────────────────────────────
+  const [showNightAlert, setShowNightAlert] = useState(false)
+  useEffect(() => {
+    if (!store.state.nightMode.enabled || nightAlertShown) return
+    const check = () => {
+      if (isNightTime(store.state.nightMode.startTime, store.state.nightMode.endTime)) {
+        setShowNightAlert(true)
+        setNightAlertShown(true)
+      }
+    }
+    check()
+    const id = setInterval(check, 5 * 60 * 1000)
+    return () => clearInterval(id)
+  }, [store.state.nightMode, nightAlertShown])
+
+  // Reset night alert flag at dawn
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!isNightTime(store.state.nightMode.startTime, store.state.nightMode.endTime)) {
+        setNightAlertShown(false)
+      }
+    }, 60 * 1000)
+    return () => clearInterval(id)
+  }, [store.state.nightMode])
+
+  // ── Fall Detection ────────────────────────────────────────────────────────
+  const handleFallSOS = useCallback(() => {
+    const phones = store.state.contacts.map(c => c.phone).filter(Boolean).join(',')
+    if (!phones) return
+    const msg = `🚨 STURZ ERKANNT! ${store.state.userName} könnte gestürzt sein! Bitte sofort melden! ⏰ ${getCurrentTime()} Uhr`
+    window.location.href = `sms:${phones}?body=${encodeURIComponent(msg)}`
+  }, [store.state.contacts, store.state.userName])
+
+  const { fallState, dismiss: dismissFall } = useFallDetection(fallDetectionEnabled, handleFallSOS)
+
+  // ── Geofencing ────────────────────────────────────────────────────────────
+  const handleGeofenceExit = useCallback((loc: SavedLocation) => {
+    const phones = store.state.contacts.map(c => c.phone).filter(Boolean).join(',')
+    if (!phones) return
+    const msg = `📍 ${store.state.userName} hat den sicheren Bereich verlassen!\nStandort: https://maps.google.com/maps?q=${loc.lat},${loc.lon}\n${loc.address}\n⏰ ${loc.timestamp} Uhr`
+    window.location.href = `sms:${phones}?body=${encodeURIComponent(msg)}`
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('⚠️ Bereich verlassen', { body: `${store.state.userName} hat den sicheren Bereich verlassen!`, icon: '/icons/icon-192.png' })
+    }
+  }, [store.state.contacts, store.state.userName])
+
+  useGeofencing(
+    store.state.geofence,
+    handleGeofenceExit,
+    (loc) => store.updateLastLocation(loc)
+  )
+
+  // ── Check-in ──────────────────────────────────────────────────────────────
+  const { showAlert: showCheckInAlert, doCheckIn, checkedToday, lastCheckInTime } = useCheckIn(
+    store.state.reminders.checkIn,
+    store.state.contacts,
+    store.state.userName
+  )
+
+  // ── OK Button handler ─────────────────────────────────────────────────────
+  function handleOkSend() {
+    const phones = store.state.contacts.map(c => c.phone).filter(Boolean).join(',')
+    const msg = `✅ ${store.state.userName} geht es gut – ${getCurrentTime()} Uhr`
+    if (phones) window.location.href = `sms:${phones}?body=${encodeURIComponent(msg)}`
+    localStorage.setItem('ilocare_last_ok', getCurrentTime())
+  }
 
   function navigate(s: Screen, contactId?: string) {
     setMsgContactId(contactId ?? null)
     setScreen(s)
   }
 
-  if (screen === 'contacts') {
-    return <ContactsScreen contacts={store.state.contacts} onBack={() => setScreen('dashboard')} />
-  }
+  // ── Overlays (fall, check-in, night) ─────────────────────────────────────
+  const overlays = (
+    <>
+      {fallState === 'detected' && <FallAlert onDismiss={dismissFall} onSOS={handleFallSOS} countdownSeconds={30} />}
+      {showCheckInAlert && <CheckInAlert userName={store.state.userName} onCheckIn={doCheckIn} onDismiss={() => {}} />}
+      {showNightAlert && <NightModeAlert time={getCurrentTime()} contacts={store.state.contacts} userName={store.state.userName} onDismiss={() => setShowNightAlert(false)} />}
+    </>
+  )
 
-  if (screen === 'messages') {
-    return (
-      <MessagesScreen
-        contacts={store.state.contacts}
-        initialContactId={msgContactId}
-        onBack={() => setScreen('dashboard')}
-      />
-    )
-  }
+  // ── Screens ───────────────────────────────────────────────────────────────
+  if (screen === 'contacts') return <>{overlays}<ContactsScreen contacts={store.state.contacts} onBack={() => setScreen('dashboard')} /></>
+  if (screen === 'messages') return <>{overlays}<MessagesScreen contacts={store.state.contacts} initialContactId={msgContactId} onBack={() => setScreen('dashboard')} /></>
+  if (screen === 'medications') return <>{overlays}<MedicationsScreen medications={store.state.medications} onTaken={store.markDoseTaken} onBack={() => setScreen('dashboard')} /></>
 
-  if (screen === 'medications') {
-    return (
-      <MedicationsScreen
-        medications={store.state.medications}
-        onTaken={store.markDoseTaken}
-        onBack={() => setScreen('dashboard')}
-      />
-    )
-  }
+  if (screen === 'emergency') return (
+    <>{overlays}<EmergencyScreen contacts={store.state.contacts} userName={store.state.userName} onBack={() => setScreen('dashboard')} /></>
+  )
 
-  if (screen === 'emergency') {
-    return (
-      <EmergencyScreen
-        contacts={store.state.contacts}
-        userName={store.state.userName}
-        onBack={() => setScreen('dashboard')}
-      />
-    )
-  }
+  if (screen === 'settings') return (
+    <>{overlays}<SettingsScreen
+      state={store.state}
+      onBack={() => setScreen('dashboard')}
+      unlockSettings={store.unlockSettings}
+      lockSettings={store.lockSettings}
+      addContact={store.addContact}
+      deleteContact={store.deleteContact}
+      addMedication={store.addMedication}
+      deleteMedication={store.deleteMedication}
+      addDoctor={store.addDoctor}
+      updateDoctor={store.updateDoctor}
+      deleteDoctor={store.deleteDoctor}
+      updateState={store.updateState}
+    /></>
+  )
 
-  if (screen === 'settings') {
-    return (
-      <SettingsScreen
-        state={store.state}
-        onBack={() => setScreen('dashboard')}
-        unlockSettings={store.unlockSettings}
-        lockSettings={store.lockSettings}
-        addContact={store.addContact}
-        deleteContact={store.deleteContact}
-        addMedication={store.addMedication}
-        deleteMedication={store.deleteMedication}
-        updateState={store.updateState}
-      />
-    )
-  }
+  if (screen === 'insurance') return (
+    <>{overlays}<InsuranceCardScreen
+      card={store.state.insuranceCard}
+      onSave={card => store.updateState(s => ({ ...s, insuranceCard: card }))}
+      onBack={() => setScreen('dashboard')}
+    /></>
+  )
+
+  if (screen === 'shopping') return (
+    <>{overlays}<ShoppingScreen
+      items={store.state.shoppingList}
+      onAdd={store.addShoppingItem}
+      onToggle={store.toggleShoppingItem}
+      onDelete={store.deleteShoppingItem}
+      onClearDone={store.clearDoneItems}
+      onBack={() => setScreen('dashboard')}
+    /></>
+  )
+
+  if (screen === 'doctors') return <>{overlays}<DoctorsScreen doctors={store.state.doctors} onBack={() => setScreen('dashboard')} /></>
+
+  if (screen === 'location') return (
+    <>{overlays}<LocationScreen
+      geofence={store.state.geofence}
+      lastKnownLocation={store.state.lastKnownLocation}
+      contacts={store.state.contacts}
+      userName={store.state.userName}
+      onGeofenceUpdate={g => store.updateState(s => ({ ...s, geofence: g }))}
+      onLocationSaved={store.updateLastLocation}
+      onBack={() => setScreen('dashboard')}
+    /></>
+  )
 
   return (
-    <DashboardScreen
-      userName={store.state.userName}
-      weatherCity={store.state.weatherCity}
-      medications={store.state.medications}
-      contacts={store.state.contacts}
-      onNavigate={navigate}
-    />
+    <>
+      {overlays}
+      <DashboardScreen
+        userName={store.state.userName}
+        weatherCity={store.state.weatherCity}
+        medications={store.state.medications}
+        contacts={store.state.contacts}
+        checkedInToday={checkedToday}
+        lastCheckInTime={lastCheckInTime}
+        onNavigate={navigate}
+        onOkSend={handleOkSend}
+      />
+      {/* Fall Detection Toggle (kleiner Button oben rechts) */}
+      <button
+        onClick={() => setFallDetectionEnabled(f => !f)}
+        className="fixed z-40 flex items-center justify-center rounded-full"
+        style={{
+          bottom: 'calc(env(safe-area-inset-bottom) + 16px)',
+          right: '16px',
+          width: '56px',
+          height: '56px',
+          backgroundColor: fallDetectionEnabled ? '#ef4444' : '#f8e8e8',
+          border: `3px solid ${fallDetectionEnabled ? '#991b1b' : '#e8a0a0'}`,
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        }}
+        title={fallDetectionEnabled ? 'Sturzerkennung aus' : 'Sturzerkennung an'}
+      >
+        <span style={{ fontSize: '1.5rem' }}>{fallDetectionEnabled ? '🛡️' : '📱'}</span>
+      </button>
+    </>
   )
 }

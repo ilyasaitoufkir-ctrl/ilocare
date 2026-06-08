@@ -1,29 +1,56 @@
 import { useState, useEffect, useCallback } from 'react'
-import type { AppState, Contact, Medication, MedicationDose } from '../types'
+import type {
+  AppState, Contact, Medication, MedicationDose,
+  Doctor, ShoppingItem, SavedLocation
+} from '../types'
 
-const STORAGE_KEY = 'ilocare_v2'
+const STORAGE_KEY = 'ilocare_v3'
 
-function defaultDoses(frequency: 1 | 2 | 3): MedicationDose[] {
+export function defaultDoses(frequency: 1 | 2 | 3): MedicationDose[] {
   if (frequency === 1) return [{ time: '08:00', taken: false }]
   if (frequency === 2) return [{ time: '08:00', taken: false }, { time: '20:00', taken: false }]
   return [{ time: '08:00', taken: false }, { time: '14:00', taken: false }, { time: '20:00', taken: false }]
 }
 
+const DEFAULT_DOCTORS: Doctor[] = [
+  { id: 'd1', name: 'Notarzt', phone: '112', type: 'notarzt' },
+  { id: 'd2', name: 'Notruf Polizei', phone: '110', type: 'notarzt' },
+]
+
 const defaultState: AppState = {
   contacts: [],
   medications: [],
   userName: 'Ilyas',
-  reminders: { okReminderTime: '19:00' },
+  reminders: {
+    okReminderTime: '19:00',
+    checkIn: { enabled: false, time: '09:00', alertDelayMinutes: 60 },
+  },
   weatherCity: 'Berlin',
   settingsUnlocked: false,
   adminPin: '1234',
+  insuranceCard: { front: null, back: null, ownerName: '', cardNumber: '' },
+  doctors: DEFAULT_DOCTORS,
+  shoppingList: [],
+  geofence: { enabled: false, radiusMeters: 500, homeLocation: null },
+  nightMode: { enabled: false, startTime: '22:00', endTime: '07:00' },
+  lastKnownLocation: null,
 }
 
 function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return defaultState
-    return { ...defaultState, ...JSON.parse(raw), settingsUnlocked: false }
+    const parsed = JSON.parse(raw)
+    // Deep merge to pick up new default fields
+    return {
+      ...defaultState,
+      ...parsed,
+      reminders: { ...defaultState.reminders, ...parsed.reminders },
+      insuranceCard: { ...defaultState.insuranceCard, ...parsed.insuranceCard },
+      geofence: { ...defaultState.geofence, ...parsed.geofence },
+      nightMode: { ...defaultState.nightMode, ...parsed.nightMode },
+      settingsUnlocked: false,
+    }
   } catch {
     return defaultState
   }
@@ -63,21 +90,12 @@ export function useStore() {
 
   // ── Medications ───────────────────────────────────────────────────────────
   const addMedication = useCallback((med: {
-    name: string
-    photo: string | null
-    barcode: string | null
-    frequency: 1 | 2 | 3
-    doses: MedicationDose[]
-    dosage: string
-    notes: string
+    name: string; photo: string | null; barcode: string | null
+    frequency: 1 | 2 | 3; doses: MedicationDose[]; dosage: string; notes: string
   }) => {
     updateState(s => ({
       ...s,
-      medications: [...s.medications, {
-        ...med,
-        id: Date.now().toString(),
-        lastResetDate: new Date().toDateString(),
-      }],
+      medications: [...s.medications, { ...med, id: Date.now().toString(), lastResetDate: new Date().toDateString() }],
     }))
   }, [updateState])
 
@@ -94,8 +112,7 @@ export function useStore() {
       ...s,
       medications: s.medications.map(m => {
         if (m.id !== medId) return m
-        const doses = m.doses.map((d, i) => i === doseIndex ? { ...d, taken: true } : d)
-        return { ...m, doses }
+        return { ...m, doses: m.doses.map((d, i) => i === doseIndex ? { ...d, taken: true } : d) }
       }),
     }))
   }, [updateState])
@@ -106,13 +123,50 @@ export function useStore() {
       ...s,
       medications: s.medications.map(m => {
         if (m.lastResetDate === today) return m
-        return {
-          ...m,
-          doses: m.doses.map(d => ({ ...d, taken: false })),
-          lastResetDate: today,
-        }
+        return { ...m, doses: m.doses.map(d => ({ ...d, taken: false })), lastResetDate: today }
       }),
     }))
+  }, [updateState])
+
+  // ── Doctors ───────────────────────────────────────────────────────────────
+  const addDoctor = useCallback((doc: Omit<Doctor, 'id'>) => {
+    updateState(s => ({ ...s, doctors: [...s.doctors, { ...doc, id: Date.now().toString() }] }))
+  }, [updateState])
+
+  const updateDoctor = useCallback((id: string, data: Partial<Doctor>) => {
+    updateState(s => ({ ...s, doctors: s.doctors.map(d => d.id === id ? { ...d, ...data } : d) }))
+  }, [updateState])
+
+  const deleteDoctor = useCallback((id: string) => {
+    updateState(s => ({ ...s, doctors: s.doctors.filter(d => d.id !== id) }))
+  }, [updateState])
+
+  // ── Shopping ──────────────────────────────────────────────────────────────
+  const addShoppingItem = useCallback((text: string) => {
+    updateState(s => ({
+      ...s,
+      shoppingList: [...s.shoppingList, { id: Date.now().toString(), text, done: false }],
+    }))
+  }, [updateState])
+
+  const toggleShoppingItem = useCallback((id: string) => {
+    updateState(s => ({
+      ...s,
+      shoppingList: s.shoppingList.map(item => item.id === id ? { ...item, done: !item.done } : item),
+    }))
+  }, [updateState])
+
+  const deleteShoppingItem = useCallback((id: string) => {
+    updateState(s => ({ ...s, shoppingList: s.shoppingList.filter(i => i.id !== id) }))
+  }, [updateState])
+
+  const clearDoneItems = useCallback(() => {
+    updateState(s => ({ ...s, shoppingList: s.shoppingList.filter(i => !i.done) }))
+  }, [updateState])
+
+  // ── Location ──────────────────────────────────────────────────────────────
+  const updateLastLocation = useCallback((loc: SavedLocation) => {
+    updateState(s => ({ ...s, lastKnownLocation: loc }))
   }, [updateState])
 
   // ── Settings ──────────────────────────────────────────────────────────────
@@ -129,13 +183,12 @@ export function useStore() {
   }, [])
 
   return {
-    state,
-    updateState,
+    state, updateState,
     addContact, updateContact, deleteContact,
     addMedication, updateMedication, deleteMedication, markDoseTaken, resetDailyDoses,
+    addDoctor, updateDoctor, deleteDoctor,
+    addShoppingItem, toggleShoppingItem, deleteShoppingItem, clearDoneItems,
+    updateLastLocation,
     unlockSettings, lockSettings,
-    defaultDoses,
   }
 }
-
-export { defaultDoses }

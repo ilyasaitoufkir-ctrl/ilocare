@@ -4,7 +4,7 @@ import { Header } from '../components/Header'
 import { PhotoPicker } from '../components/PhotoPicker'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { defaultDoses } from '../store/useStore'
-import type { AppState, Contact, Medication, MedicationDose } from '../types'
+import type { AppState, Contact, MedicationDose, Doctor, DoctorType } from '../types'
 
 interface SettingsScreenProps {
   state: AppState
@@ -15,6 +15,9 @@ interface SettingsScreenProps {
   deleteContact: (id: string) => void
   addMedication: (m: { name: string; photo: string | null; barcode: string | null; frequency: 1 | 2 | 3; doses: MedicationDose[]; dosage: string; notes: string }) => void
   deleteMedication: (id: string) => void
+  addDoctor: (d: Omit<Doctor, 'id'>) => void
+  updateDoctor: (id: string, data: Partial<Doctor>) => void
+  deleteDoctor: (id: string) => void
   updateState: (updater: (s: AppState) => AppState) => void
 }
 
@@ -23,19 +26,13 @@ function PinScreen({ onUnlock }: { onUnlock: (pin: string) => boolean }) {
   const [pin, setPin] = useState('')
   const [error, setError] = useState(false)
   const digits = ['1','2','3','4','5','6','7','8','9','','0','⌫']
-
   function handleDigit(d: string) {
     if (pin.length >= 4) return
-    const next = pin + d
-    setPin(next)
+    const next = pin + d; setPin(next)
     if (next.length === 4) {
-      if (!onUnlock(next)) {
-        setError(true)
-        setTimeout(() => { setPin(''); setError(false) }, 900)
-      }
+      if (!onUnlock(next)) { setError(true); setTimeout(() => { setPin(''); setError(false) }, 900) }
     }
   }
-
   return (
     <div className="flex flex-col items-center justify-center flex-1 p-6 gap-8">
       <div className="flex flex-col items-center gap-3">
@@ -44,19 +41,13 @@ function PinScreen({ onUnlock }: { onUnlock: (pin: string) => boolean }) {
         <p style={{ fontSize: '1rem', color: '#6b4a4a', margin: 0 }}>PIN eingeben (Standard: 1234)</p>
       </div>
       <div className="flex gap-4">
-        {[0,1,2,3].map(i => (
-          <div key={i} className="rounded-full" style={{ width: '24px', height: '24px', backgroundColor: i < pin.length ? (error ? '#ef4444' : '#e8a0a0') : '#e8d0d0', border: '2px solid #e8a0a0', transition: 'background-color 0.2s' }} />
-        ))}
+        {[0,1,2,3].map(i => <div key={i} className="rounded-full" style={{ width:'24px', height:'24px', backgroundColor: i < pin.length ? (error ? '#ef4444' : '#e8a0a0') : '#e8d0d0', border:'2px solid #e8a0a0' }} />)}
       </div>
-      <div className="grid gap-3" style={{ gridTemplateColumns: 'repeat(3, 1fr)', width: '100%', maxWidth: '300px' }}>
+      <div className="grid gap-3" style={{ gridTemplateColumns:'repeat(3, 1fr)', width:'100%', maxWidth:'300px' }}>
         {digits.map((d, i) => (
-          <button
-            key={i}
-            onClick={() => d === '⌫' ? setPin(p => p.slice(0,-1)) : d ? handleDigit(d) : undefined}
-            disabled={!d}
+          <button key={i} onClick={() => d === '⌫' ? setPin(p => p.slice(0,-1)) : d ? handleDigit(d) : undefined} disabled={!d}
             className="rounded-2xl flex items-center justify-center active:scale-90 transition-transform"
-            style={{ height: '80px', backgroundColor: d ? '#ffffff' : 'transparent', border: d ? '2px solid #e8d0d0' : 'none', fontSize: '1.8rem', fontWeight: 700, color: '#2d1a1a', visibility: d ? 'visible' : 'hidden' }}
-          >
+            style={{ height:'80px', backgroundColor: d ? '#fff' : 'transparent', border: d ? '2px solid #e8d0d0' : 'none', fontSize:'1.8rem', fontWeight:700, color:'#2d1a1a', visibility: d ? 'visible' : 'hidden' }}>
             {d}
           </button>
         ))}
@@ -65,247 +56,265 @@ function PinScreen({ onUnlock }: { onUnlock: (pin: string) => boolean }) {
   )
 }
 
+// ── Section header ──────────────────────────────────────────────────────────
+function SectionTitle({ title, action }: { title: string; action?: React.ReactNode }) {
+  return (
+    <div className="flex items-center justify-between mb-3">
+      <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>{title}</p>
+      {action}
+    </div>
+  )
+}
+
+function AddBtn({ onClick, label }: { onClick: () => void; label: string }) {
+  return (
+    <button onClick={onClick} className="flex items-center gap-2 rounded-2xl px-4 py-3" style={{ backgroundColor: '#e8a0a0', minHeight: '50px' }}>
+      <Plus size={20} color="#fff" />
+      <span style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>{label}</span>
+    </button>
+  )
+}
+
 // ── Contact Form ────────────────────────────────────────────────────────────
 function ContactForm({ onSave, onCancel }: { onSave: (c: Omit<Contact,'id'|'order'>) => void; onCancel: () => void }) {
-  const [name, setName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [photo, setPhoto] = useState<string | null>(null)
-  const [isEmergency, setIsEmergency] = useState(false)
-
+  const [name, setName] = useState(''); const [phone, setPhone] = useState(''); const [photo, setPhoto] = useState<string|null>(null); const [isEmergency, setIsEmergency] = useState(false)
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-3xl" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
-      <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neuer Kontakt</p>
+    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neuer Kontakt</p>
       <div className="flex items-center gap-4">
         <PhotoPicker photo={photo} onPhoto={setPhoto} size={80} />
         <div className="flex flex-col gap-3 flex-1">
-          <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name"
-            className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor: '#fff', border: '2px solid #e8a0a0', fontSize: '1.1rem', fontWeight: 600, color: '#2d1a1a', outline: 'none' }} />
-          <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+49 123 456789"
-            className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor: '#fff', border: '2px solid #e8a0a0', fontSize: '1.1rem', fontWeight: 600, color: '#2d1a1a', outline: 'none' }} />
+          <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+          <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+49 123 456789" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
         </div>
       </div>
-      <button onClick={() => setIsEmergency(!isEmergency)}
-        className="flex items-center gap-3 rounded-2xl px-4 py-3"
-        style={{ backgroundColor: isEmergency ? '#fef2f2' : '#fff', border: `2px solid ${isEmergency ? '#f87171' : '#e8d0d0'}` }}>
-        <span style={{ fontSize: '1.4rem' }}>{isEmergency ? '✅' : '⬜'}</span>
-        <span style={{ fontSize: '1rem', fontWeight: 700, color: '#2d1a1a' }}>🚨 Notfallkontakt (SOS)</span>
+      <button onClick={() => setIsEmergency(!isEmergency)} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: isEmergency ? '#fef2f2' : '#fff', border: `2px solid ${isEmergency ? '#f87171' : '#e8d0d0'}` }}>
+        <span style={{ fontSize:'1.4rem' }}>{isEmergency ? '✅' : '⬜'}</span>
+        <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>🚨 Notfallkontakt (SOS)</span>
       </button>
       <div className="flex gap-3">
-        <button onClick={() => name && onSave({ name, phone, photo, isEmergency })} disabled={!name}
-          className="flex-1 rounded-2xl py-4"
-          style={{ backgroundColor: name ? '#4ade80' : '#e8d0d0', fontSize: '1.1rem', fontWeight: 800, color: name ? '#14532d' : '#999', minHeight: '60px' }}>
-          Speichern
-        </button>
-        <button onClick={onCancel} className="flex-1 rounded-2xl py-4"
-          style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0', fontSize: '1.1rem', fontWeight: 700, color: '#6b4a4a', minHeight: '60px' }}>
-          Abbrechen
-        </button>
+        <button onClick={() => name && onSave({ name, phone, photo, isEmergency })} disabled={!name} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name ? '#4ade80' : '#e8d0d0', fontSize:'1.1rem', fontWeight:800, color: name ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
+        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:700, color:'#6b4a4a', minHeight:'60px' }}>Abbrechen</button>
+      </div>
+    </div>
+  )
+}
+
+// ── Doctor Form ─────────────────────────────────────────────────────────────
+function DoctorForm({ onSave, onCancel }: { onSave: (d: Omit<Doctor,'id'>) => void; onCancel: () => void }) {
+  const [name, setName] = useState(''); const [phone, setPhone] = useState(''); const [type, setType] = useState<DoctorType>('hausarzt')
+  const types: { value: DoctorType; label: string; emoji: string }[] = [
+    { value: 'hausarzt', label: 'Hausarzt', emoji: '👨‍⚕️' },
+    { value: 'apotheke', label: 'Apotheke', emoji: '💊' },
+    { value: 'notarzt', label: 'Notarzt', emoji: '🚨' },
+    { value: 'other', label: 'Andere', emoji: '📞' },
+  ]
+  return (
+    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neuer Arzt / Kontakt</p>
+      <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name (z.B. Dr. Müller)" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+      <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Telefonnummer" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+      <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        {types.map(t => (
+          <button key={t.value} onClick={() => setType(t.value)} className="flex flex-col items-center justify-center rounded-2xl py-3 gap-1" style={{ backgroundColor: type === t.value ? '#e8a0a0' : '#fff', border: `2px solid ${type === t.value ? '#c87070' : '#e8d0d0'}`, fontSize:'0.85rem', fontWeight:700, color: type === t.value ? '#fff' : '#6b4a4a' }}>
+            <span style={{ fontSize: '1.4rem' }}>{t.emoji}</span>{t.label}
+          </button>
+        ))}
+      </div>
+      <div className="flex gap-3">
+        <button onClick={() => name && phone && onSave({ name, phone, type })} disabled={!name || !phone} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name && phone ? '#4ade80' : '#e8d0d0', fontSize:'1.1rem', fontWeight:800, color: name && phone ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
+        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:700, color:'#6b4a4a', minHeight:'60px' }}>Abbrechen</button>
       </div>
     </div>
   )
 }
 
 // ── Medication Form ─────────────────────────────────────────────────────────
-function MedForm({ onSave, onCancel }: {
-  onSave: (m: { name: string; photo: string | null; barcode: string | null; frequency: 1 | 2 | 3; doses: MedicationDose[]; dosage: string; notes: string }) => void
-  onCancel: () => void
-}) {
-  const [name, setName] = useState('')
-  const [photo, setPhoto] = useState<string | null>(null)
-  const [frequency, setFrequency] = useState<1 | 2 | 3>(1)
-  const [doses, setDoses] = useState<MedicationDose[]>(defaultDoses(1))
-  const [dosage, setDosage] = useState('1 Tablette')
-  const [notes, setNotes] = useState('')
-
-  function handleFrequencyChange(f: 1 | 2 | 3) {
-    setFrequency(f)
-    setDoses(defaultDoses(f))
-  }
-
-  function updateTime(i: number, time: string) {
-    setDoses(prev => prev.map((d, idx) => idx === i ? { ...d, time } : d))
-  }
-
-  const canSave = name.trim().length > 0
-
+function MedForm({ onSave, onCancel }: { onSave: (m: { name: string; photo: string|null; barcode: string|null; frequency: 1|2|3; doses: MedicationDose[]; dosage: string; notes: string }) => void; onCancel: () => void }) {
+  const [name, setName] = useState(''); const [photo, setPhoto] = useState<string|null>(null); const [frequency, setFrequency] = useState<1|2|3>(1); const [doses, setDoses] = useState<MedicationDose[]>(defaultDoses(1)); const [dosage, setDosage] = useState('1 Tablette'); const [notes, setNotes] = useState('')
+  function handleFreqChange(f: 1|2|3) { setFrequency(f); setDoses(defaultDoses(f)) }
+  function updateTime(i: number, t: string) { setDoses(prev => prev.map((d, idx) => idx === i ? { ...d, time: t } : d)) }
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-3xl" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
-      <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neues Medikament</p>
-
+    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neues Medikament</p>
       <div className="flex items-center gap-4">
         <PhotoPicker photo={photo} onPhoto={setPhoto} size={80} emoji="💊" />
-        <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name des Medikaments"
-          className="flex-1 rounded-2xl px-4 py-3" style={{ backgroundColor: '#fff', border: '2px solid #e8a0a0', fontSize: '1.1rem', fontWeight: 600, color: '#2d1a1a', outline: 'none' }} />
+        <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name des Medikaments" className="flex-1 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
       </div>
-
-      {/* Dosierung */}
       <div>
-        <p style={{ fontSize: '1rem', fontWeight: 700, color: '#6b4a4a', margin: '0 0 8px' }}>Dosierung</p>
-        <div className="flex gap-2">
-          {['½ Tablette', '1 Tablette', '2 Tabletten', '1 Kapsel'].map(d => (
-            <button key={d} onClick={() => setDosage(d)}
-              className="flex-1 rounded-xl py-3"
-              style={{ backgroundColor: dosage === d ? '#e8a0a0' : '#fff', border: `2px solid ${dosage === d ? '#c87070' : '#e8d0d0'}`, fontSize: '0.85rem', fontWeight: 700, color: dosage === d ? '#fff' : '#6b4a4a' }}>
-              {d}
-            </button>
-          ))}
+        <p style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', margin:'0 0 8px' }}>Dosierung</p>
+        <div className="flex gap-2 flex-wrap">
+          {['½ Tablette','1 Tablette','2 Tabletten','1 Kapsel'].map(d => <button key={d} onClick={() => setDosage(d)} className="rounded-xl px-3 py-2" style={{ backgroundColor: dosage===d ? '#e8a0a0' : '#fff', border:`2px solid ${dosage===d ? '#c87070' : '#e8d0d0'}`, fontSize:'0.9rem', fontWeight:700, color: dosage===d ? '#fff' : '#6b4a4a' }}>{d}</button>)}
         </div>
-        <input type="text" value={dosage} onChange={e => setDosage(e.target.value)} placeholder="Andere Dosierung..."
-          className="w-full rounded-2xl px-4 py-2 mt-2" style={{ backgroundColor: '#fff', border: '2px solid #e8d0d0', fontSize: '1rem', color: '#2d1a1a', outline: 'none' }} />
+        <input type="text" value={dosage} onChange={e => setDosage(e.target.value)} placeholder="Andere..." className="w-full rounded-2xl px-4 py-2 mt-2" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', fontSize:'1rem', color:'#2d1a1a', outline:'none' }} />
       </div>
-
-      {/* Häufigkeit */}
       <div>
-        <p style={{ fontSize: '1rem', fontWeight: 700, color: '#6b4a4a', margin: '0 0 8px' }}>Wie oft täglich?</p>
+        <p style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', margin:'0 0 8px' }}>Häufigkeit täglich</p>
         <div className="flex gap-3">
-          {([1,2,3] as const).map(f => (
-            <button key={f} onClick={() => handleFrequencyChange(f)}
-              className="flex-1 rounded-2xl py-4"
-              style={{ backgroundColor: frequency === f ? '#e8a0a0' : '#fff', border: `2px solid ${frequency === f ? '#c87070' : '#e8d0d0'}`, fontSize: '1.3rem', fontWeight: 800, color: frequency === f ? '#fff' : '#6b4a4a', minHeight: '70px' }}>
-              {f}×
-            </button>
-          ))}
+          {([1,2,3] as const).map(f => <button key={f} onClick={() => handleFreqChange(f)} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: frequency===f ? '#e8a0a0' : '#fff', border:`2px solid ${frequency===f ? '#c87070' : '#e8d0d0'}`, fontSize:'1.3rem', fontWeight:800, color: frequency===f ? '#fff' : '#6b4a4a', minHeight:'70px' }}>{f}×</button>)}
         </div>
       </div>
-
-      {/* Uhrzeiten */}
       <div>
-        <p style={{ fontSize: '1rem', fontWeight: 700, color: '#6b4a4a', margin: '0 0 8px' }}>Einnahme-Uhrzeiten</p>
+        <p style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', margin:'0 0 8px' }}>Uhrzeiten</p>
         <div className="flex flex-col gap-2">
           {doses.map((dose, i) => (
-            <div key={i} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: '#fff', border: '2px solid #e8d0d0' }}>
-              <span style={{ fontSize: '1rem', fontWeight: 700, color: '#6b4a4a', minWidth: '80px' }}>
-                {i === 0 ? '🌅 1.' : i === 1 ? '☀️ 2.' : '🌙 3.'} Einnahme
-              </span>
-              <input type="time" value={dose.time} onChange={e => updateTime(i, e.target.value)}
-                style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2d1a1a', border: 'none', backgroundColor: 'transparent', outline: 'none' }} />
+            <div key={i} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
+              <span style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', minWidth:'80px' }}>{i===0?'🌅 1.':i===1?'☀️ 2.':'🌙 3.'} Einnahme</span>
+              <input type="time" value={dose.time} onChange={e => updateTime(i, e.target.value)} style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
             </div>
           ))}
         </div>
       </div>
-
-      {/* Hinweise */}
-      <input type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Hinweise (z.B. mit Wasser)"
-        className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor: '#fff', border: '2px solid #e8d0d0', fontSize: '1rem', color: '#2d1a1a', outline: 'none' }} />
-
+      <input type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Hinweise..." className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', fontSize:'1rem', color:'#2d1a1a', outline:'none' }} />
       <div className="flex gap-3">
-        <button onClick={() => canSave && onSave({ name, photo, barcode: null, frequency, doses, dosage, notes })} disabled={!canSave}
-          className="flex-1 rounded-2xl py-4"
-          style={{ backgroundColor: canSave ? '#4ade80' : '#e8d0d0', fontSize: '1.1rem', fontWeight: 800, color: canSave ? '#14532d' : '#999', minHeight: '60px' }}>
-          Speichern
-        </button>
-        <button onClick={onCancel} className="flex-1 rounded-2xl py-4"
-          style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0', fontSize: '1.1rem', fontWeight: 700, color: '#6b4a4a', minHeight: '60px' }}>
-          Abbrechen
-        </button>
+        <button onClick={() => name && onSave({ name, photo, barcode:null, frequency, doses, dosage, notes })} disabled={!name} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name ? '#4ade80' : '#e8d0d0', fontSize:'1.1rem', fontWeight:800, color: name ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
+        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:700, color:'#6b4a4a', minHeight:'60px' }}>Abbrechen</button>
       </div>
     </div>
   )
 }
 
-// ── Main Settings Screen ────────────────────────────────────────────────────
-export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, addContact, deleteContact, addMedication, deleteMedication, updateState }: SettingsScreenProps) {
+// ── Main ────────────────────────────────────────────────────────────────────
+export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, addContact, deleteContact, addMedication, deleteMedication, addDoctor, updateDoctor, deleteDoctor, updateState }: SettingsScreenProps) {
   const [showContactForm, setShowContactForm] = useState(false)
   const [showMedForm, setShowMedForm] = useState(false)
-  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'contact'|'med'; id: string } | null>(null)
+  const [showDoctorForm, setShowDoctorForm] = useState(false)
+  const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'contact'|'med'|'doctor'; id: string }|null>(null)
 
   if (!state.settingsUnlocked) {
-    return (
-      <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
-        <Header title="⚙️ Einstellungen" onBack={onBack} />
-        <PinScreen onUnlock={unlockSettings} />
-      </div>
-    )
+    return <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}><Header title="⚙️ Einstellungen" onBack={onBack} /><PinScreen onUnlock={unlockSettings} /></div>
   }
 
   return (
     <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
-      <Header
-        title="⚙️ Einstellungen"
-        onBack={() => { lockSettings(); onBack() }}
-        rightAction={
-          <button onClick={lockSettings} className="flex items-center justify-center rounded-2xl"
-            style={{ width: '56px', height: '56px', backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
-            <Lock size={24} color="#6b4a4a" />
-          </button>
-        }
+      <Header title="⚙️ Einstellungen" onBack={() => { lockSettings(); onBack() }}
+        rightAction={<button onClick={lockSettings} className="flex items-center justify-center rounded-2xl" style={{ width:'56px', height:'56px', backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0' }}><Lock size={24} color="#6b4a4a" /></button>}
       />
 
       {deleteConfirm && (
-        <ConfirmDialog
-          message="Wirklich löschen?"
-          onYes={() => { deleteConfirm.type === 'contact' ? deleteContact(deleteConfirm.id) : deleteMedication(deleteConfirm.id); setDeleteConfirm(null) }}
+        <ConfirmDialog message="Wirklich löschen?"
+          onYes={() => {
+            if (deleteConfirm.type === 'contact') deleteContact(deleteConfirm.id)
+            else if (deleteConfirm.type === 'med') deleteMedication(deleteConfirm.id)
+            else deleteDoctor(deleteConfirm.id)
+            setDeleteConfirm(null)
+          }}
           onNo={() => setDeleteConfirm(null)}
         />
       )}
 
       <div className="flex flex-col gap-6 p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
 
-        {/* Name */}
+        {/* Name + Stadt */}
         <section>
-          <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: '0 0 12px' }}>👤 Name</p>
-          <input type="text" value={state.userName} onChange={e => updateState(s => ({ ...s, userName: e.target.value }))}
-            className="w-full rounded-2xl px-4 py-4"
-            style={{ backgroundColor: '#fff', border: '2px solid #e8a0a0', fontSize: '1.2rem', fontWeight: 600, color: '#2d1a1a', outline: 'none' }} />
+          <SectionTitle title="👤 Persönliche Daten" />
+          <div className="flex flex-col gap-3">
+            <input type="text" value={state.userName} onChange={e => updateState(s => ({ ...s, userName: e.target.value }))} placeholder="Dein Name" className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.2rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+            <input type="text" value={state.weatherCity} onChange={e => updateState(s => ({ ...s, weatherCity: e.target.value }))} placeholder="Wetter-Stadt (z.B. Berlin)" className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+          </div>
         </section>
 
-        {/* Wetter-Stadt */}
+        {/* PIN */}
         <section>
-          <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: '0 0 12px' }}>🌤️ Wetter-Stadt</p>
-          <input type="text" value={state.weatherCity} onChange={e => updateState(s => ({ ...s, weatherCity: e.target.value }))}
-            placeholder="z.B. Berlin, München, Hamburg"
-            className="w-full rounded-2xl px-4 py-4"
-            style={{ backgroundColor: '#fff', border: '2px solid #e8a0a0', fontSize: '1.1rem', fontWeight: 600, color: '#2d1a1a', outline: 'none' }} />
+          <SectionTitle title="🔐 Admin PIN" />
+          <input type="password" value={state.adminPin} onChange={e => updateState(s => ({ ...s, adminPin: e.target.value }))} maxLength={4} className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.3rem', letterSpacing:'8px', fontWeight:700, color:'#2d1a1a', outline:'none' }} />
         </section>
 
-        {/* Admin PIN */}
+        {/* Check-in */}
         <section>
-          <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: '0 0 12px' }}>🔐 Admin PIN</p>
-          <input type="password" value={state.adminPin} onChange={e => updateState(s => ({ ...s, adminPin: e.target.value }))}
-            placeholder="4-stellige PIN" maxLength={4}
-            className="w-full rounded-2xl px-4 py-4"
-            style={{ backgroundColor: '#fff', border: '2px solid #e8a0a0', fontSize: '1.3rem', letterSpacing: '8px', fontWeight: 700, color: '#2d1a1a', outline: 'none' }} />
+          <SectionTitle title="✅ Täglicher Check-in" />
+          <div className="flex flex-col gap-3">
+            <button onClick={() => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, enabled: !s.reminders.checkIn.enabled } } }))}
+              className="flex items-center justify-between rounded-2xl px-4 py-4"
+              style={{ backgroundColor: state.reminders.checkIn.enabled ? '#dcfce7' : '#f8e8e8', border: `2px solid ${state.reminders.checkIn.enabled ? '#86efac' : '#e8d0d0'}` }}>
+              <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{state.reminders.checkIn.enabled ? '✅ Check-in aktiv' : '⬜ Check-in aus'}</span>
+              <span style={{ fontSize:'1.4rem' }}>{state.reminders.checkIn.enabled ? '🟢' : '⚪'}</span>
+            </button>
+            <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
+              <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>⏰ Erinnerung um</span>
+              <input type="time" value={state.reminders.checkIn.time} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, time: e.target.value } } }))} style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+            </div>
+            <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
+              <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>📱 SMS nach</span>
+              <select value={state.reminders.checkIn.alertDelayMinutes} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, alertDelayMinutes: Number(e.target.value) } } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }}>
+                {[30,60,90,120].map(m => <option key={m} value={m}>{m} Minuten</option>)}
+              </select>
+            </div>
+          </div>
         </section>
 
-        {/* OK-Erinnerung */}
+        {/* Nacht Modus */}
         <section>
-          <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: '0 0 12px' }}>🔔 OK-Erinnerung täglich</p>
-          <div className="flex items-center justify-between gap-3 rounded-2xl px-4 py-4" style={{ backgroundColor: '#fff', border: '2px solid #e8d0d0' }}>
-            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2d1a1a' }}>✅ Erinnerung um</span>
-            <input type="time" value={state.reminders.okReminderTime}
-              onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, okReminderTime: e.target.value } }))}
-              style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2d1a1a', border: 'none', backgroundColor: 'transparent', outline: 'none' }} />
+          <SectionTitle title="🌙 Nacht-Modus" />
+          <div className="flex flex-col gap-3">
+            <button onClick={() => updateState(s => ({ ...s, nightMode: { ...s.nightMode, enabled: !s.nightMode.enabled } }))}
+              className="flex items-center justify-between rounded-2xl px-4 py-4"
+              style={{ backgroundColor: state.nightMode.enabled ? '#1e293b' : '#f8e8e8', border: `2px solid ${state.nightMode.enabled ? '#475569' : '#e8d0d0'}` }}>
+              <span style={{ fontSize:'1.1rem', fontWeight:700, color: state.nightMode.enabled ? '#f1f5f9' : '#2d1a1a' }}>{state.nightMode.enabled ? '🌙 Nacht-Modus aktiv' : '⬜ Nacht-Modus aus'}</span>
+              <span style={{ fontSize:'1.4rem' }}>{state.nightMode.enabled ? '🌙' : '⚪'}</span>
+            </button>
+            <div className="flex gap-3">
+              <div className="flex-1 flex items-center justify-between rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
+                <span style={{ fontSize:'0.95rem', fontWeight:700, color:'#6b4a4a' }}>Von</span>
+                <input type="time" value={state.nightMode.startTime} onChange={e => updateState(s => ({ ...s, nightMode: { ...s.nightMode, startTime: e.target.value } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+              </div>
+              <div className="flex-1 flex items-center justify-between rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
+                <span style={{ fontSize:'0.95rem', fontWeight:700, color:'#6b4a4a' }}>Bis</span>
+                <input type="time" value={state.nightMode.endTime} onChange={e => updateState(s => ({ ...s, nightMode: { ...s.nightMode, endTime: e.target.value } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Sturzerkennung */}
+        <section>
+          <SectionTitle title="📱 Sturzerkennung" />
+          <div className="rounded-2xl px-4 py-4" style={{ backgroundColor:'#fef3c7', border:'2px solid #fcd34d' }}>
+            <p style={{ fontSize:'0.95rem', color:'#92400e', margin:0, lineHeight:1.5 }}>
+              ℹ️ Die Sturzerkennung nutzt den Bewegungssensor des iPhones. Auf dem Dashboard kann sie aktiviert werden.
+            </p>
+          </div>
+        </section>
+
+        {/* Ärzte */}
+        <section>
+          <SectionTitle title={`👨‍⚕️ Ärzte & Notfall (${state.doctors.length})`} action={<AddBtn onClick={() => setShowDoctorForm(true)} label="Hinzufügen" />} />
+          {showDoctorForm && <DoctorForm onSave={d => { addDoctor(d); setShowDoctorForm(false) }} onCancel={() => setShowDoctorForm(false)} />}
+          <div className="flex flex-col gap-3">
+            {state.doctors.map(d => {
+              const emojis: Record<DoctorType, string> = { notarzt:'🚨', hausarzt:'👨‍⚕️', apotheke:'💊', other:'📞' }
+              return (
+                <div key={d.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', minHeight:'70px' }}>
+                  <span style={{ fontSize:'1.6rem' }}>{emojis[d.type]}</span>
+                  <div className="flex flex-col flex-1">
+                    <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{d.name}</span>
+                    <span style={{ fontSize:'0.9rem', color:'#6b4a4a' }}>{d.phone}</span>
+                  </div>
+                  <button onClick={() => setDeleteConfirm({ type:'doctor', id:d.id })} className="rounded-xl p-3" style={{ backgroundColor:'#fef2f2' }}>
+                    <Trash2 size={22} color="#dc2626" />
+                  </button>
+                </div>
+              )
+            })}
           </div>
         </section>
 
         {/* Kontakte */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>👥 Kontakte ({state.contacts.length}/5)</p>
-            {state.contacts.length < 5 && !showContactForm && (
-              <button onClick={() => setShowContactForm(true)} className="flex items-center gap-2 rounded-2xl px-4 py-3" style={{ backgroundColor: '#e8a0a0', minHeight: '50px' }}>
-                <Plus size={20} color="#fff" />
-                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>Hinzufügen</span>
-              </button>
-            )}
-          </div>
-          {showContactForm && (
-            <div className="mb-3">
-              <ContactForm onSave={c => { addContact(c); setShowContactForm(false) }} onCancel={() => setShowContactForm(false)} />
-            </div>
-          )}
+          <SectionTitle title={`👥 Kontakte (${state.contacts.length}/5)`} action={state.contacts.length < 5 && !showContactForm ? <AddBtn onClick={() => setShowContactForm(true)} label="Hinzufügen" /> : undefined} />
+          {showContactForm && <ContactForm onSave={c => { addContact(c); setShowContactForm(false) }} onCancel={() => setShowContactForm(false)} />}
           <div className="flex flex-col gap-3">
             {state.contacts.map(c => (
-              <div key={c.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: '#fff', border: '2px solid #e8d0d0', minHeight: '70px' }}>
-                <div className="rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width: '50px', height: '50px', backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
-                  {c.photo ? <img src={c.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '1.5rem' }}>👤</span>}
+              <div key={c.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', minHeight:'70px' }}>
+                <div className="rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width:'50px', height:'50px', backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0' }}>
+                  {c.photo ? <img src={c.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : <span style={{ fontSize:'1.5rem' }}>👤</span>}
                 </div>
                 <div className="flex flex-col flex-1">
-                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2d1a1a' }}>{c.name}</span>
-                  {c.phone && <span style={{ fontSize: '0.9rem', color: '#6b4a4a' }}>{c.phone}</span>}
-                  {c.isEmergency && <span style={{ fontSize: '0.85rem', color: '#dc2626', fontWeight: 700 }}>🚨 Notfallkontakt</span>}
+                  <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{c.name}</span>
+                  {c.phone && <span style={{ fontSize:'0.9rem', color:'#6b4a4a' }}>{c.phone}</span>}
+                  {c.isEmergency && <span style={{ fontSize:'0.85rem', color:'#dc2626', fontWeight:700 }}>🚨 Notfallkontakt</span>}
                 </div>
-                <button onClick={() => setDeleteConfirm({ type: 'contact', id: c.id })} className="rounded-xl p-3" style={{ backgroundColor: '#fef2f2' }}>
+                <button onClick={() => setDeleteConfirm({ type:'contact', id:c.id })} className="rounded-xl p-3" style={{ backgroundColor:'#fef2f2' }}>
                   <Trash2 size={22} color="#dc2626" />
                 </button>
               </div>
@@ -315,38 +324,35 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
 
         {/* Medikamente */}
         <section>
-          <div className="flex items-center justify-between mb-3">
-            <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>💊 Medikamente</p>
-            {!showMedForm && (
-              <button onClick={() => setShowMedForm(true)} className="flex items-center gap-2 rounded-2xl px-4 py-3" style={{ backgroundColor: '#e8a0a0', minHeight: '50px' }}>
-                <Plus size={20} color="#fff" />
-                <span style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>Hinzufügen</span>
-              </button>
-            )}
-          </div>
-          {showMedForm && (
-            <div className="mb-3">
-              <MedForm onSave={m => { addMedication(m); setShowMedForm(false) }} onCancel={() => setShowMedForm(false)} />
-            </div>
-          )}
+          <SectionTitle title="💊 Medikamente" action={!showMedForm ? <AddBtn onClick={() => setShowMedForm(true)} label="Hinzufügen" /> : undefined} />
+          {showMedForm && <MedForm onSave={m => { addMedication(m); setShowMedForm(false) }} onCancel={() => setShowMedForm(false)} />}
           <div className="flex flex-col gap-3">
             {state.medications.map(m => (
-              <div key={m.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: '#fff', border: '2px solid #e8d0d0', minHeight: '70px' }}>
-                <div className="rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width: '50px', height: '50px', backgroundColor: '#f8e8e8' }}>
-                  {m.photo ? <img src={m.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '1.5rem' }}>💊</span>}
+              <div key={m.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', minHeight:'70px' }}>
+                <div className="rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width:'50px', height:'50px', backgroundColor:'#f8e8e8' }}>
+                  {m.photo ? <img src={m.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : <span style={{ fontSize:'1.5rem' }}>💊</span>}
                 </div>
                 <div className="flex flex-col flex-1">
-                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2d1a1a' }}>{m.name}</span>
-                  <span style={{ fontSize: '0.9rem', color: '#6b4a4a' }}>{m.dosage} · {m.frequency}× täglich</span>
-                  <span style={{ fontSize: '0.85rem', color: '#c87070' }}>{m.doses.map(d => d.time).join(', ')} Uhr</span>
+                  <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{m.name}</span>
+                  <span style={{ fontSize:'0.85rem', color:'#6b4a4a' }}>{m.dosage} · {m.frequency}× täglich · {m.doses.map(d=>d.time).join(', ')} Uhr</span>
                 </div>
-                <button onClick={() => setDeleteConfirm({ type: 'med', id: m.id })} className="rounded-xl p-3" style={{ backgroundColor: '#fef2f2' }}>
+                <button onClick={() => setDeleteConfirm({ type:'med', id:m.id })} className="rounded-xl p-3" style={{ backgroundColor:'#fef2f2' }}>
                   <Trash2 size={22} color="#dc2626" />
                 </button>
               </div>
             ))}
           </div>
         </section>
+
+        {/* OK Erinnerung */}
+        <section>
+          <SectionTitle title="🔔 OK-Erinnerung" />
+          <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
+            <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>✅ Täglich um</span>
+            <input type="time" value={state.reminders.okReminderTime} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, okReminderTime: e.target.value } }))} style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+          </div>
+        </section>
+
       </div>
     </div>
   )

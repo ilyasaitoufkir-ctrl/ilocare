@@ -1,5 +1,16 @@
-export type Screen = 'dashboard' | 'contacts' | 'messages' | 'medications' | 'emergency' | 'settings'
+export type Screen =
+  | 'dashboard'
+  | 'contacts'
+  | 'messages'
+  | 'medications'
+  | 'emergency'
+  | 'settings'
+  | 'insurance'
+  | 'shopping'
+  | 'doctors'
+  | 'location'
 
+// ── Contacts ────────────────────────────────────────────────────────────────
 export interface Contact {
   id: string
   name: string
@@ -9,8 +20,9 @@ export interface Contact {
   order: number
 }
 
+// ── Medications ──────────────────────────────────────────────────────────────
 export interface MedicationDose {
-  time: string       // "08:00"
+  time: string
   taken: boolean
 }
 
@@ -20,16 +32,72 @@ export interface Medication {
   photo: string | null
   barcode: string | null
   frequency: 1 | 2 | 3
-  doses: MedicationDose[]   // e.g. [{ time: "08:00", taken: false }, { time: "20:00", taken: false }]
-  dosage: string            // e.g. "1 Tablette"
+  doses: MedicationDose[]
+  dosage: string
   notes: string
   lastResetDate: string | null
 }
 
-export interface ReminderSettings {
-  okReminderTime: string
+// ── Insurance Card ───────────────────────────────────────────────────────────
+export interface InsuranceCard {
+  front: string | null
+  back: string | null
+  ownerName: string
+  cardNumber: string
 }
 
+// ── Doctors ──────────────────────────────────────────────────────────────────
+export type DoctorType = 'hausarzt' | 'apotheke' | 'notarzt' | 'other'
+
+export interface Doctor {
+  id: string
+  name: string
+  phone: string
+  type: DoctorType
+}
+
+// ── Shopping List ────────────────────────────────────────────────────────────
+export interface ShoppingItem {
+  id: string
+  text: string
+  done: boolean
+}
+
+// ── Check-In ─────────────────────────────────────────────────────────────────
+export interface CheckInSettings {
+  enabled: boolean
+  time: string              // "08:00"
+  alertDelayMinutes: number // minutes before SMS after missed check-in
+}
+
+// ── Location / Geofencing ────────────────────────────────────────────────────
+export interface SavedLocation {
+  lat: number
+  lon: number
+  address: string
+  timestamp: string
+}
+
+export interface GeofenceSettings {
+  enabled: boolean
+  radiusMeters: number
+  homeLocation: SavedLocation | null
+}
+
+// ── Night Mode ───────────────────────────────────────────────────────────────
+export interface NightModeSettings {
+  enabled: boolean
+  startTime: string   // "22:00"
+  endTime: string     // "07:00"
+}
+
+// ── Reminders ────────────────────────────────────────────────────────────────
+export interface ReminderSettings {
+  okReminderTime: string
+  checkIn: CheckInSettings
+}
+
+// ── App State ─────────────────────────────────────────────────────────────────
 export interface AppState {
   contacts: Contact[]
   medications: Medication[]
@@ -38,8 +106,15 @@ export interface AppState {
   weatherCity: string
   settingsUnlocked: boolean
   adminPin: string
+  insuranceCard: InsuranceCard
+  doctors: Doctor[]
+  shoppingList: ShoppingItem[]
+  geofence: GeofenceSettings
+  nightMode: NightModeSettings
+  lastKnownLocation: SavedLocation | null
 }
 
+// ── API response types ───────────────────────────────────────────────────────
 export interface WeatherData {
   temp: number
   feels_like: number

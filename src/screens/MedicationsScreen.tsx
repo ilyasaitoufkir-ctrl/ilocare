@@ -134,7 +134,7 @@ export function MedicationsScreen({ medications, onTaken, onBack }: MedicationsS
   const done = medications.filter(m => m.doses.every(d => d.taken))
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
+    <div className="screen">
       {showScanner && (
         <Suspense fallback={<div className="fixed inset-0 z-50 flex items-center justify-center" style={{ backgroundColor: '#000' }}><p style={{ color: '#fff', fontSize: '1.2rem' }}>Kamera wird geladen...</p></div>}>
           <BarcodeScanner
@@ -168,7 +168,7 @@ export function MedicationsScreen({ medications, onTaken, onBack }: MedicationsS
         </div>
       )}
 
-      <div className="flex flex-col gap-4 p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+      <div className="scroll-zone" style={{ padding: '12px 16px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {medications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
             <span style={{ fontSize: '4rem' }}>💊</span>

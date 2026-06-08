@@ -182,11 +182,11 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
   const [deleteConfirm, setDeleteConfirm] = useState<{ type: 'contact'|'med'|'doctor'; id: string }|null>(null)
 
   if (!state.settingsUnlocked) {
-    return <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}><Header title="⚙️ Einstellungen" onBack={onBack} /><PinScreen onUnlock={unlockSettings} /></div>
+    return <div className="screen"><Header title="⚙️ Einstellungen" onBack={onBack} /><PinScreen onUnlock={unlockSettings} /></div>
   }
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
+    <div className="screen">
       <Header title="⚙️ Einstellungen" onBack={() => { lockSettings(); onBack() }}
         rightAction={<button onClick={lockSettings} className="flex items-center justify-center rounded-2xl" style={{ width:'56px', height:'56px', backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0' }}><Lock size={24} color="#6b4a4a" /></button>}
       />
@@ -203,7 +203,7 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
         />
       )}
 
-      <div className="flex flex-col gap-6 p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+      <div className="scroll-zone" style={{ padding: '12px 16px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         {/* Name + Stadt */}
         <section>

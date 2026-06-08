@@ -1,33 +1,64 @@
 @import "tailwindcss";
 
-* {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+/* ── Reset & Fixed Layout ──────────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
 }
 
-html {
-  overscroll-behavior: none;
-  font-size: 20px;
-}
-
-body {
+html, body {
+  overflow: hidden !important;
+  position: fixed !important;
+  width: 100% !important;
+  height: 100% !important;
   margin: 0;
   padding: 0;
   background-color: #fdf6f0;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
   user-select: none;
-  overflow-x: hidden;
 }
 
 #root {
-  min-height: 100svh;
-  min-height: 100vh;
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background-color: #fdf6f0;
 }
 
+/* ── Screen base – every screen fills viewport exactly ───────────────────── */
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background-color: #fdf6f0;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Scrollable zone ONLY inside .scroll-zone */
+.scroll-zone {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+/* ── Global Typography & Controls ─────────────────────────────────────────── */
+html { font-size: 16px; }
+
 input, textarea, select {
-  font-size: 20px !important;
+  font-size: 18px !important;
   -webkit-appearance: none;
+  border-radius: 0;
 }
 
 button {
@@ -35,13 +66,20 @@ button {
   -webkit-appearance: none;
   border: none;
   outline: none;
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-button:active {
-  transform: scale(0.97);
-  transition: transform 0.08s ease;
-}
+button:active { transform: scale(0.96); transition: transform 0.08s ease; }
 
-/* Safe area for iPhone notch */
-.safe-top { padding-top: env(safe-area-inset-top); }
+a { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
+
+/* ── Safe area helpers ────────────────────────────────────────────────────── */
+.safe-top    { padding-top:    env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-left   { padding-left:   env(safe-area-inset-left); }
+.safe-right  { padding-right:  env(safe-area-inset-right); }
+
+/* ── Utility – overflow hidden everywhere by default ─────────────────────── */
+.no-scroll { overflow: hidden !important; }

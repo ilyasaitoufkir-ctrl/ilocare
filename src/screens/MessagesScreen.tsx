@@ -75,10 +75,10 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
 
   if (!selectedContact) {
     return (
-      <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
+      <div className="screen">
         <Header title="💬 Nachrichten" onBack={onBack} />
-        <div className="flex flex-col gap-4 p-4">
-          <p style={{ fontSize: '1.1rem', color: '#6b4a4a', textAlign: 'center', padding: '16px 0' }}>
+        <div className="scroll-zone" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <p style={{ fontSize: '1.1rem', color: '#6b4a4a', textAlign: 'center', padding: '8px 0' }}>
             Wen möchtest du anschreiben?
           </p>
           {contacts.map(contact => (
@@ -112,7 +112,7 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
   }
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
+    <div className="screen">
       <Header
         title={`💬 ${selectedContact.name}`}
         onBack={() => setSelectedContact(null)}
@@ -123,15 +123,15 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
       <input ref={videoInputRef} type="file" accept="video/*" capture="environment" onChange={handleVideo} style={{ display: 'none' }} />
 
       {/* Kontakt oben */}
-      <div className="flex flex-col items-center py-8 gap-3" style={{ backgroundColor: '#f8e8e8' }}>
+      <div className="flex flex-col items-center py-4 gap-2" style={{ backgroundColor: '#f8e8e8', flexShrink: 0 }}>
         <div
           className="rounded-full overflow-hidden flex items-center justify-center"
-          style={{ width: '120px', height: '120px', backgroundColor: '#ffffff', border: '4px solid #e8a0a0' }}
+          style={{ width: '80px', height: '80px', backgroundColor: '#ffffff', border: '4px solid #e8a0a0' }}
         >
           {selectedContact.photo ? (
             <img src={selectedContact.photo} alt={selectedContact.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <span style={{ fontSize: '4rem' }}>👤</span>
+            <span style={{ fontSize: '2.5rem' }}>👤</span>
           )}
         </div>
         <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>
@@ -153,7 +153,7 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
       )}
 
       {/* Action Buttons */}
-      <div className="flex flex-col gap-4 p-6 flex-1">
+      <div className="scroll-zone" style={{ padding: '12px 20px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {/* Foto */}
         <button
           onClick={() => photoInputRef.current?.click()}

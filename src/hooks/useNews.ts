@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { NewsItem } from '../types'
 
-const RSS_URL = 'https://www.tagesschau.de/xml/rss2'
+const RSS_URL = 'https://www.tagesschau.de/xml/rss2/'
 const PROXY = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(RSS_URL)}&count=5`
 
 export function useNews() {

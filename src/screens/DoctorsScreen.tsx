@@ -51,10 +51,10 @@ export function DoctorsScreen({ doctors, onBack }: DoctorsScreenProps) {
   const sorted = [...doctors].sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type))
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
+    <div className="screen">
       <Header title="👨‍⚕️ Ärzte & Notfall" onBack={onBack} />
 
-      <div className="flex flex-col gap-4 p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+      <div className="scroll-zone" style={{ padding: '12px 16px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
         {sorted.map(doc => <DoctorCard key={doc.id} doctor={doc} />)}
 

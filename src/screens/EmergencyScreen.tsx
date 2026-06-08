@@ -69,7 +69,7 @@ export function EmergencyScreen({ contacts, userName, onBack }: EmergencyScreenP
   }
 
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
+    <div className="screen">
       <Header title="🆘 Notfall" onBack={onBack} />
 
       {uiState === 'confirm-ok' && (
@@ -85,7 +85,7 @@ export function EmergencyScreen({ contacts, userName, onBack }: EmergencyScreenP
         <ConfirmDialog message="🚨 LETZTE BESTÄTIGUNG! Familie + Notrufnummer werden sofort kontaktiert!" onYes={handleSOSConfirmed} onNo={() => setUiState('idle')} />
       )}
 
-      <div className="flex flex-col gap-5 p-5 flex-1" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }}>
+      <div className="scroll-zone" style={{ padding: '16px 20px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
 
         {/* Letzter OK Status */}
         {lastOk && uiState === 'idle' && (

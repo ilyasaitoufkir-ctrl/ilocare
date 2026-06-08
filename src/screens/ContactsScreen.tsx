@@ -162,9 +162,9 @@ function ContactCard({ contact }: { contact: Contact }) {
 
 export function ContactsScreen({ contacts, onBack }: ContactsScreenProps) {
   return (
-    <div className="flex flex-col min-h-screen" style={{ backgroundColor: '#fdf6f0' }}>
+    <div className="screen">
       <Header title="👥 Kontakte" onBack={onBack} />
-      <div className="flex flex-col gap-4 p-4" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+      <div className="scroll-zone" style={{ padding: '12px 16px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
         {contacts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <span style={{ fontSize: '4rem' }}>👥</span>

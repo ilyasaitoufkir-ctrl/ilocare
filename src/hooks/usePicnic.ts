@@ -1,12 +1,13 @@
 import { useState } from 'react'
 import md5 from 'md5'
 
-const BASE = 'https://storefront-prod.nl.picnicinternational.com/api/v15'
-
-const BASE_HEADERS: Record<string, string> = {
-  'Content-Type': 'application/json',
-  'x-picnic-country': 'DE',
-  'x-picnic-language': 'de',
+async function picnicProxy(endpoint: string, method: string, body?: unknown, token?: string) {
+  const res = await fetch('/api/picnic', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ endpoint, method, body, token }),
+  })
+  return { res, data: await res.json() as Record<string, unknown> }
 }
 
 export function usePicnic(email: string, password: string) {
@@ -14,48 +15,43 @@ export function usePicnic(email: string, password: string) {
   const [status, setStatus] = useState<string | null>(null)
 
   async function login(): Promise<string | null> {
-    const loginData = {
-      key: email.trim().toLowerCase(),
-      secret: md5(password),
-      client_id: 1,
-    }
     try {
-      const res = await fetch(`${BASE}/user/login`, {
-        method: 'POST',
-        headers: BASE_HEADERS,
-        body: JSON.stringify(loginData),
+      const { res, data } = await picnicProxy('/user/login', 'POST', {
+        key: email.trim().toLowerCase(),
+        secret: md5(password),
+        client_id: 1,
       })
+
       if (!res.ok) {
-        let detail = `HTTP ${res.status}`
-        try {
-          const body = await res.json() as { error?: { message?: string; code?: string } }
-          if (body.error?.message) detail += `: ${body.error.message}`
-          else if (body.error?.code) detail += `: ${body.error.code}`
-        } catch { /* body not JSON */ }
-        setStatus(`❌ Picnic Login fehlgeschlagen – ${detail}`)
+        const err = (data as { error?: { message?: string; code?: string } }).error
+        const detail = err?.message || err?.code || `HTTP ${res.status}`
+        setStatus(`❌ Picnic Login fehlgeschlagen: ${detail}`)
         return null
       }
+
       const token = res.headers.get('x-picnic-auth')
       if (!token) {
-        setStatus('❌ Kein Auth-Token in Antwort – bitte Picnic App prüfen')
+        setStatus('❌ Kein Auth-Token – bitte Zugangsdaten prüfen')
         return null
       }
       return token
     } catch (e) {
-      const msg = e instanceof Error ? e.message : String(e)
-      setStatus(`❌ Netzwerk-Fehler: ${msg}`)
+      setStatus(`❌ Proxy-Fehler: ${e instanceof Error ? e.message : String(e)}`)
       return null
     }
   }
 
   async function searchProduct(token: string, query: string): Promise<string | null> {
     try {
-      const res = await fetch(`${BASE}/search?search_term=${encodeURIComponent(query)}`, {
-        headers: { ...BASE_HEADERS, 'x-picnic-auth': token },
-      })
+      const { res, data } = await picnicProxy(
+        `/search?search_term=${encodeURIComponent(query)}`,
+        'GET',
+        undefined,
+        token
+      )
       if (!res.ok) return null
-      const data = await res.json() as Array<{ type: string; items?: Array<{ id: string }> }>
-      for (const section of data) {
+      const sections = data as unknown as Array<{ type: string; items?: Array<{ id: string }> }>
+      for (const section of sections) {
         if (section.type === 'SEARCH_RESULT_ITEMS' && section.items?.[0]) {
           return section.items[0].id
         }
@@ -68,11 +64,7 @@ export function usePicnic(email: string, password: string) {
 
   async function addToCart(token: string, productId: string) {
     try {
-      await fetch(`${BASE}/cart/add_product`, {
-        method: 'POST',
-        headers: { ...BASE_HEADERS, 'x-picnic-auth': token },
-        body: JSON.stringify({ product_id: productId, count: 1 }),
-      })
+      await picnicProxy('/cart/add_product', 'POST', { product_id: productId, count: 1 }, token)
     } catch { /* ignore */ }
   }
 

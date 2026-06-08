@@ -21,10 +21,10 @@ export function useClaudeAI() {
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 256,
+          max_tokens: 200,
           messages: [{
             role: 'user',
-            content: `Extrahiere alle Einkaufsartikel aus diesem deutschen Text. Antworte NUR mit einem JSON-Objekt, kein Markdown, kein Text, keine Erklärung:\n{"produkte":["Artikel1","Artikel2"]}\n\nBeispiel:\nEingabe: "Ich brauche Milch und Brot"\nAusgabe: {"produkte":["Milch","Brot"]}\n\nText: "${text.replace(/"/g, "'")}"`
+            content: `Extrahiere nur die Lebensmittel aus diesem Text als JSON Array. Nur JSON, kein Text davor oder danach.\nText: "${text.replace(/"/g, "'")}"\nFormat: {"produkte": ["Milch", "Brot"]}`
           }]
         }),
       })

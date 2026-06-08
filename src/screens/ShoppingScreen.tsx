@@ -109,7 +109,7 @@ export function ShoppingScreen({ items, picnicEmail, picnicPassword, onAdd, onTo
             {micActive ? '🔴' : micBusy ? '🤖' : '🎤'}
           </span>
           <span style={{ fontSize: '1.3rem', fontWeight: 900, color: micBusy ? '#713f12' : '#fff' }}>
-            {micActive ? 'Sprechen...' : micBusy ? 'Claude denkt...' : 'Mikrofon halten'}
+            {micActive ? 'Sprechen...' : micBusy ? 'Einkaufsliste wird erstellt... 🛒' : 'Mikrofon halten'}
           </span>
           <span style={{ fontSize: '0.85rem', fontWeight: 600, color: micBusy ? '#713f12' : 'rgba(255,255,255,0.85)' }}>
             {micActive

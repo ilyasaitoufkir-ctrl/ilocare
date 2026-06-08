@@ -1,16 +1,23 @@
 import { useState, useEffect } from 'react'
 import type { NewsItem } from '../types'
 
-const CACHE_KEY = 'ilocare_news'
 const CACHE_TTL = 15 * 60 * 1000
 
-export function useNews() {
+function cacheKey(feedUrl: string) {
+  return `ilocare_news_${feedUrl}`
+}
+
+export function useNews(feedUrl = 'https://www.tagesschau.de/xml/rss2/') {
   const [items, setItems] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const cached = sessionStorage.getItem(CACHE_KEY)
+    setLoading(true)
+    setError(null)
+
+    const key = cacheKey(feedUrl)
+    const cached = sessionStorage.getItem(key)
     if (cached) {
       try {
         const p = JSON.parse(cached)
@@ -22,7 +29,7 @@ export function useNews() {
       } catch { /* ignore */ }
     }
 
-    fetch('/api/news')
+    fetch(`/api/news?feed=${encodeURIComponent(feedUrl)}`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return r.text()
@@ -40,11 +47,11 @@ export function useNews() {
             .slice(0, 140),
         }))
         setItems(news)
-        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ items: news, ts: Date.now() }))
+        sessionStorage.setItem(key, JSON.stringify({ items: news, ts: Date.now() }))
       })
       .catch(() => setError('Nachrichten nicht verfügbar'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [feedUrl])
 
   return { items, loading, error }
 }

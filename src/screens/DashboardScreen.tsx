@@ -44,22 +44,22 @@ function getCountdown(timeStr: string): string {
   return `in ${Math.floor(diff / 60)}h ${diff % 60}m`
 }
 
-const MAIN_BUTTONS: { screen: Screen; emoji: string; label: string; color: string; border: string }[] = [
-  { screen: 'contacts',    emoji: '👥',  label: 'Kontakte',     color: '#fff',    border: '#e8d0d0' },
-  { screen: 'doctors',     emoji: '👨‍⚕️', label: 'Arzt / Notfall', color: '#f0fdf4', border: '#86efac' },
-  { screen: 'medications', emoji: '💊',  label: 'Medikamente',  color: '#fff',    border: '#e8d0d0' },
-  { screen: 'emergency',   emoji: '🆘',  label: 'SOS Notruf',   color: '#fff0f0', border: '#f87171' },
+const MAIN_BUTTONS: { screen: Screen; emoji: string; label: string; grad: string; shadow: string }[] = [
+  { screen: 'contacts',    emoji: '👥',  label: 'Kontakte',       grad: 'linear-gradient(135deg, #2a9d8f, #7ececa)', shadow: 'rgba(42,157,143,0.35)' },
+  { screen: 'doctors',     emoji: '👨‍⚕️', label: 'Arzt & Notfall', grad: 'linear-gradient(135deg, #52d68a, #a8edbb)', shadow: 'rgba(82,214,138,0.35)' },
+  { screen: 'medications', emoji: '💊',  label: 'Medikamente',    grad: 'linear-gradient(135deg, #7ececa, #2a9d8f)', shadow: 'rgba(126,206,202,0.35)' },
+  { screen: 'emergency',   emoji: '🆘',  label: 'SOS Notruf',     grad: 'linear-gradient(135deg, #f05a5a, #dc2626)', shadow: 'rgba(220,38,38,0.35)' },
 ]
 
-const SECONDARY_BUTTONS: { screen: Screen; emoji: string; label: string }[] = [
-  { screen: 'insurance', emoji: '💳', label: 'Krankenkasse' },
-  { screen: 'shopping',  emoji: '🛒', label: 'Einkaufsliste' },
-  { screen: 'messages',  emoji: '💬', label: 'Nachrichten' },
-  { screen: 'location',  emoji: '📍', label: 'Standort' },
+const SECONDARY_BUTTONS: { screen: Screen; emoji: string; label: string; grad: string }[] = [
+  { screen: 'insurance', emoji: '💳', label: 'Krankenkasse', grad: 'linear-gradient(135deg, #8fe03a, #a8edbb)' },
+  { screen: 'shopping',  emoji: '🛒', label: 'Einkaufen',    grad: 'linear-gradient(135deg, #52d68a, #7ececa)' },
+  { screen: 'messages',  emoji: '💬', label: 'Nachrichten',  grad: 'linear-gradient(135deg, #2a9d8f, #52d68a)' },
+  { screen: 'location',  emoji: '📍', label: 'Standort',     grad: 'linear-gradient(135deg, #7ececa, #8fe03a)' },
 ]
 
 export function DashboardScreen({
-  userName, weatherCity, medications, contacts,
+  userName, weatherCity, medications,
   checkedInToday, lastCheckInTime,
   onNavigate, onOkSend,
 }: DashboardScreenProps) {
@@ -89,79 +89,96 @@ export function DashboardScreen({
         />
       )}
 
-      {/* ── Uhr-Header ──────────────────────────────────────────────────── */}
+      {/* ── Gradient Header ──────────────────────────────────────────────── */}
       <div style={{
         flexShrink: 0,
-        display: 'flex', flexDirection: 'column', alignItems: 'center',
-        padding: '10px 16px 8px',
-        backgroundColor: '#f8e8e8',
-        borderBottom: '3px solid #e8a0a0',
+        background: 'linear-gradient(135deg, #1a7a6e 0%, #2a9d8f 50%, #3db88a 100%)',
+        padding: '10px 18px 12px',
+        boxShadow: '0 4px 24px rgba(26,122,110,0.4)',
+        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
       }}>
-        <p style={{ fontSize: '0.75rem', fontWeight: 700, color: '#c87070', margin: '0 0 2px', letterSpacing: '3px', textTransform: 'uppercase' }}>ilocare</p>
-        <span style={{ fontSize: '3.6rem', fontWeight: 900, color: '#2d1a1a', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{time}</span>
-        <p style={{ fontSize: '1rem', fontWeight: 700, color: '#6b4a4a', margin: '2px 0 0' }}>{dayName}, {date}</p>
-        <p style={{ fontSize: '0.85rem', color: '#c87070', margin: '1px 0 0', fontWeight: 600 }}>{greeting}, {userName}! 😊</p>
+        <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.75)', margin: 0, letterSpacing: '4px', textTransform: 'uppercase' }}>
+          ✦ ilocare ✦
+        </p>
+        <span style={{
+          fontSize: '3.8rem', fontWeight: 900, color: '#ffffff', lineHeight: 1,
+          fontVariantNumeric: 'tabular-nums', textShadow: '0 2px 12px rgba(0,0,0,0.15)',
+        }}>
+          {time}
+        </span>
+        <p style={{ fontSize: '0.95rem', fontWeight: 700, color: 'rgba(255,255,255,0.9)', margin: 0 }}>
+          {dayName}, {date}
+        </p>
+        <p style={{ fontSize: '0.82rem', fontWeight: 600, color: 'rgba(255,255,255,0.8)', margin: '1px 0 6px' }}>
+          {greeting}, {userName}! 😊
+        </p>
+
+        {/* Weather + Check-in row */}
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          {weather ? (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              borderRadius: '20px', padding: '5px 12px',
+              border: '1px solid rgba(255,255,255,0.35)',
+            }}>
+              <span style={{ fontSize: '1.2rem', lineHeight: 1 }}>{weather.icon}</span>
+              <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff' }}>{weather.temp}°C</span>
+              <span style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>{weather.description}</span>
+            </div>
+          ) : (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              backgroundColor: 'rgba(255,255,255,0.15)', borderRadius: '20px', padding: '5px 12px',
+              border: '1px solid rgba(255,255,255,0.25)',
+            }}>
+              <span style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.8)' }}>🌤️ Wetter...</span>
+            </div>
+          )}
+          {checkedInToday && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              backgroundColor: 'rgba(255,255,255,0.2)', borderRadius: '20px', padding: '5px 12px',
+              border: '1px solid rgba(255,255,255,0.35)',
+            }}>
+              <span style={{ fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>
+                ✅ Check-in{lastCheckInTime ? ` ${lastCheckInTime}` : ''}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Content (no scroll) ─────────────────────────────────────────── */}
       <div style={{
         flex: 1, display: 'flex', flexDirection: 'column',
-        overflow: 'hidden',
-        padding: '10px 14px',
-        gap: '8px',
+        overflow: 'hidden', padding: '10px 12px', gap: '8px',
       }}>
-
-        {/* ── Wetter + Check-in ───────────────────────────────────────────── */}
-        <div style={{ flexShrink: 0, display: 'flex', gap: '8px' }}>
-          <div style={{
-            flex: 1, display: 'flex', alignItems: 'center', gap: '8px',
-            borderRadius: '14px', padding: '10px 12px',
-            backgroundColor: '#fff', border: '2px solid #e8d0d0',
-            minHeight: '56px',
-          }}>
-            {weather ? (
-              <>
-                <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>{weather.icon}</span>
-                <div>
-                  <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#2d1a1a' }}>{weather.temp}°C</span>
-                  <p style={{ fontSize: '0.78rem', color: '#6b4a4a', margin: 0, fontWeight: 600 }}>{weather.description}</p>
-                </div>
-              </>
-            ) : (
-              <p style={{ fontSize: '0.9rem', color: '#6b4a4a', margin: 0 }}>🌤️ Wetter...</p>
-            )}
-          </div>
-          {checkedInToday && (
-            <div style={{
-              flexShrink: 0, display: 'flex', alignItems: 'center',
-              borderRadius: '14px', padding: '10px 12px',
-              backgroundColor: '#f0fdf4', border: '2px solid #86efac',
-            }}>
-              <p style={{ fontSize: '0.85rem', fontWeight: 700, color: '#166534', margin: 0 }}>
-                ✅ Check-in{lastCheckInTime ? ` ${lastCheckInTime}` : ''}
-              </p>
-            </div>
-          )}
-        </div>
 
         {/* ── OK Button ───────────────────────────────────────────────────── */}
         {okSent ? (
-          <div style={{ flexShrink: 0, borderRadius: '18px', padding: '14px', textAlign: 'center', backgroundColor: '#dcfce7', border: '3px solid #4ade80' }}>
-            <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#166534', margin: 0 }}>✅ Familie informiert!</p>
+          <div style={{
+            flexShrink: 0, borderRadius: '18px', padding: '14px', textAlign: 'center',
+            background: 'linear-gradient(135deg, #52d68a, #8fe03a)',
+            boxShadow: '0 6px 20px rgba(82,214,138,0.4)',
+          }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>✅ Familie wurde informiert!</p>
           </div>
         ) : (
           <button
             onClick={() => setShowOkConfirm(true)}
             style={{
               flexShrink: 0, width: '100%', borderRadius: '18px',
-              backgroundColor: '#4ade80', border: '3px solid #16a34a',
-              minHeight: '70px', display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: '2px',
+              background: 'linear-gradient(135deg, #52d68a, #8fe03a)',
+              minHeight: '68px', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: '1px',
+              boxShadow: '0 6px 24px rgba(82,214,138,0.4)',
+              border: '1.5px solid rgba(255,255,255,0.5)',
             }}
           >
-            <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>✅</span>
-            <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#14532d' }}>Mir geht es gut</span>
-            <span style={{ fontSize: '0.78rem', color: '#166534' }}>Familie per SMS informieren</span>
+            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>✅</span>
+            <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0d2b27' }}>Mir geht es gut</span>
+            <span style={{ fontSize: '0.75rem', color: '#1a4a44', fontWeight: 600 }}>Familie per SMS informieren</span>
           </button>
         )}
 
@@ -171,20 +188,23 @@ export function DashboardScreen({
             onClick={() => onNavigate('medications')}
             style={{
               flexShrink: 0, width: '100%', borderRadius: '14px',
-              padding: '10px 14px', textAlign: 'left',
-              backgroundColor: pendingMeds.length > 0 ? '#fef3c7' : '#f0fdf4',
-              border: `2px solid ${pendingMeds.length > 0 ? '#fcd34d' : '#86efac'}`,
+              padding: '9px 14px', textAlign: 'left',
+              background: pendingMeds.length > 0
+                ? 'rgba(253,211,77,0.35)'
+                : 'rgba(168,237,187,0.35)',
+              border: `1.5px solid ${pendingMeds.length > 0 ? 'rgba(251,191,36,0.6)' : 'rgba(82,214,138,0.5)'}`,
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              minHeight: '44px',
+              minHeight: '42px',
+              backdropFilter: 'blur(10px)',
             }}
           >
-            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: pendingMeds.length > 0 ? '#92400e' : '#166534' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: 800, color: pendingMeds.length > 0 ? '#78350f' : '#0d2b27' }}>
               💊 {pendingMeds.length > 0
                 ? `${pendingMeds.reduce((n, m) => n + m.doses.filter(d => !d.taken).length, 0)} Einnahmen offen`
                 : 'Alle eingenommen ✅'}
             </span>
             {nextDose && (
-              <span style={{ fontSize: '0.82rem', color: '#92400e', fontWeight: 600 }}>
+              <span style={{ fontSize: '0.8rem', color: '#78350f', fontWeight: 600 }}>
                 ⏰ {nextDose.name} {getCountdown(nextDose.time)}
               </span>
             )}
@@ -199,13 +219,16 @@ export function DashboardScreen({
               onClick={() => onNavigate(btn.screen)}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '18px', padding: '10px 8px',
-                backgroundColor: btn.color, border: `3px solid ${btn.border}`,
-                minHeight: '80px', gap: '4px',
+                borderRadius: '20px', padding: '12px 8px', gap: '5px',
+                background: btn.grad, minHeight: '84px',
+                boxShadow: `0 6px 20px ${btn.shadow}`,
+                border: '1.5px solid rgba(255,255,255,0.4)',
               }}
             >
-              <span style={{ fontSize: '1.9rem', lineHeight: 1 }}>{btn.emoji}</span>
-              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#2d1a1a', textAlign: 'center' }}>{btn.label}</span>
+              <span style={{ fontSize: '2rem', lineHeight: 1 }}>{btn.emoji}</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#ffffff', textAlign: 'center', textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
+                {btn.label}
+              </span>
             </button>
           ))}
         </div>
@@ -218,27 +241,38 @@ export function DashboardScreen({
               onClick={() => onNavigate(btn.screen)}
               style={{
                 display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '14px', padding: '8px 4px',
-                backgroundColor: '#fff', border: '2px solid #e8d0d0',
-                minHeight: '60px', gap: '3px',
+                borderRadius: '16px', padding: '8px 4px', gap: '4px',
+                background: 'rgba(255,255,255,0.8)',
+                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                border: '1.5px solid rgba(255,255,255,0.65)',
+                boxShadow: '0 3px 14px rgba(42,157,143,0.1)',
+                minHeight: '60px',
               }}
             >
               <span style={{ fontSize: '1.4rem', lineHeight: 1 }}>{btn.emoji}</span>
-              <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6b4a4a', textAlign: 'center', lineHeight: 1.2 }}>{btn.label}</span>
+              <span style={{ fontSize: '0.68rem', fontWeight: 700, color: '#1a4a44', textAlign: 'center', lineHeight: 1.2 }}>
+                {btn.label}
+              </span>
             </button>
           ))}
         </div>
 
         {/* ── Nachrichten (2 Schlagzeilen) ────────────────────────────────── */}
         <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <p style={{ fontSize: '0.82rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>📰 Nachrichten</p>
+          <p style={{ fontSize: '0.78rem', fontWeight: 800, color: 'rgba(255,255,255,0.85)', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
+            📰 Nachrichten
+          </p>
           {news.slice(0, 2).map((item, i) => (
             <a key={i} href={item.link} target="_blank" rel="noopener noreferrer"
               style={{
-                display: 'block', borderRadius: '12px', padding: '8px 12px',
-                backgroundColor: '#fff', border: '2px solid #e8d0d0', textDecoration: 'none',
+                display: 'block', borderRadius: '14px', padding: '9px 13px',
+                background: 'rgba(255,255,255,0.82)',
+                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+                border: '1.5px solid rgba(255,255,255,0.6)',
+                boxShadow: '0 2px 12px rgba(42,157,143,0.08)',
+                textDecoration: 'none',
               }}>
-              <p style={{ fontSize: '0.88rem', fontWeight: 700, color: '#2d1a1a', margin: 0, lineHeight: 1.3 }}>{item.title}</p>
+              <p style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0d2b27', margin: 0, lineHeight: 1.3 }}>{item.title}</p>
             </a>
           ))}
         </div>
@@ -249,12 +283,15 @@ export function DashboardScreen({
           style={{
             flexShrink: 0, width: '100%', borderRadius: '14px',
             padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0',
+            background: 'rgba(255,255,255,0.75)',
+            backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+            border: '1.5px solid rgba(255,255,255,0.55)',
+            boxShadow: '0 2px 10px rgba(42,157,143,0.08)',
             marginTop: 'auto',
           }}
         >
-          <span>⚙️</span>
-          <span style={{ fontSize: '0.95rem', fontWeight: 700, color: '#6b4a4a' }}>Einstellungen</span>
+          <span style={{ fontSize: '1rem' }}>⚙️</span>
+          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1a4a44' }}>Einstellungen</span>
         </button>
       </div>
     </div>

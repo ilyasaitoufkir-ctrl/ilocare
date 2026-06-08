@@ -17,7 +17,7 @@ export function BigButton({
   label,
   sublabel,
   color = '#ffffff',
-  textColor = '#2d1a1a',
+  textColor = '#0d2b27',
   disabled = false,
   className = '',
 }: BigButtonProps) {

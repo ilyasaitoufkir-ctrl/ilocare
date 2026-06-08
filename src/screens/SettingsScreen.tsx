@@ -36,18 +36,18 @@ function PinScreen({ onUnlock }: { onUnlock: (pin: string) => boolean }) {
   return (
     <div className="flex flex-col items-center justify-center flex-1 p-6 gap-8">
       <div className="flex flex-col items-center gap-3">
-        <Lock size={52} color="#e8a0a0" />
-        <p style={{ fontSize: '1.3rem', fontWeight: 700, color: '#2d1a1a', margin: 0 }}>Einstellungen gesperrt</p>
-        <p style={{ fontSize: '1rem', color: '#6b4a4a', margin: 0 }}>PIN eingeben (Standard: 1234)</p>
+        <Lock size={52} color="#7ececa" />
+        <p style={{ fontSize: '1.3rem', fontWeight: 700, color: '#0d2b27', margin: 0 }}>Einstellungen gesperrt</p>
+        <p style={{ fontSize: '1rem', color: '#1a4a44', margin: 0 }}>PIN eingeben (Standard: 1234)</p>
       </div>
       <div className="flex gap-4">
-        {[0,1,2,3].map(i => <div key={i} className="rounded-full" style={{ width:'24px', height:'24px', backgroundColor: i < pin.length ? (error ? '#ef4444' : '#e8a0a0') : '#e8d0d0', border:'2px solid #e8a0a0' }} />)}
+        {[0,1,2,3].map(i => <div key={i} className="rounded-full" style={{ width:'24px', height:'24px', backgroundColor: i < pin.length ? (error ? '#ef4444' : '#7ececa') : '#b5e3e3', border:'2px solid #7ececa' }} />)}
       </div>
       <div className="grid gap-3" style={{ gridTemplateColumns:'repeat(3, 1fr)', width:'100%', maxWidth:'300px' }}>
         {digits.map((d, i) => (
           <button key={i} onClick={() => d === '⌫' ? setPin(p => p.slice(0,-1)) : d ? handleDigit(d) : undefined} disabled={!d}
             className="rounded-2xl flex items-center justify-center active:scale-90 transition-transform"
-            style={{ height:'80px', backgroundColor: d ? '#fff' : 'transparent', border: d ? '2px solid #e8d0d0' : 'none', fontSize:'1.8rem', fontWeight:700, color:'#2d1a1a', visibility: d ? 'visible' : 'hidden' }}>
+            style={{ height:'80px', backgroundColor: d ? '#fff' : 'transparent', border: d ? '2px solid #b5e3e3' : 'none', fontSize:'1.8rem', fontWeight:700, color:'#0d2b27', visibility: d ? 'visible' : 'hidden' }}>
             {d}
           </button>
         ))}
@@ -60,7 +60,7 @@ function PinScreen({ onUnlock }: { onUnlock: (pin: string) => boolean }) {
 function SectionTitle({ title, action }: { title: string; action?: React.ReactNode }) {
   return (
     <div className="flex items-center justify-between mb-3">
-      <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>{title}</p>
+      <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>{title}</p>
       {action}
     </div>
   )
@@ -68,7 +68,7 @@ function SectionTitle({ title, action }: { title: string; action?: React.ReactNo
 
 function AddBtn({ onClick, label }: { onClick: () => void; label: string }) {
   return (
-    <button onClick={onClick} className="flex items-center gap-2 rounded-2xl px-4 py-3" style={{ backgroundColor: '#e8a0a0', minHeight: '50px' }}>
+    <button onClick={onClick} className="flex items-center gap-2 rounded-2xl px-4 py-3" style={{ backgroundColor: '#7ececa', minHeight: '50px' }}>
       <Plus size={20} color="#fff" />
       <span style={{ fontSize: '1rem', fontWeight: 700, color: '#fff' }}>{label}</span>
     </button>
@@ -79,22 +79,22 @@ function AddBtn({ onClick, label }: { onClick: () => void; label: string }) {
 function ContactForm({ onSave, onCancel }: { onSave: (c: Omit<Contact,'id'|'order'>) => void; onCancel: () => void }) {
   const [name, setName] = useState(''); const [phone, setPhone] = useState(''); const [photo, setPhoto] = useState<string|null>(null); const [isEmergency, setIsEmergency] = useState(false)
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
-      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neuer Kontakt</p>
+    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #7ececa' }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>➕ Neuer Kontakt</p>
       <div className="flex items-center gap-4">
         <PhotoPicker photo={photo} onPhoto={setPhoto} size={80} />
         <div className="flex flex-col gap-3 flex-1">
-          <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
-          <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+49 123 456789" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+          <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }} />
+          <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+49 123 456789" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }} />
         </div>
       </div>
-      <button onClick={() => setIsEmergency(!isEmergency)} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: isEmergency ? '#fef2f2' : '#fff', border: `2px solid ${isEmergency ? '#f87171' : '#e8d0d0'}` }}>
+      <button onClick={() => setIsEmergency(!isEmergency)} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor: isEmergency ? '#fef2f2' : '#fff', border: `2px solid ${isEmergency ? '#f87171' : '#b5e3e3'}` }}>
         <span style={{ fontSize:'1.4rem' }}>{isEmergency ? '✅' : '⬜'}</span>
-        <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>🚨 Notfallkontakt (SOS)</span>
+        <span style={{ fontSize:'1rem', fontWeight:700, color:'#0d2b27' }}>🚨 Notfallkontakt (SOS)</span>
       </button>
       <div className="flex gap-3">
-        <button onClick={() => name && onSave({ name, phone, photo, isEmergency })} disabled={!name} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name ? '#4ade80' : '#e8d0d0', fontSize:'1.1rem', fontWeight:800, color: name ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
-        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:700, color:'#6b4a4a', minHeight:'60px' }}>Abbrechen</button>
+        <button onClick={() => name && onSave({ name, phone, photo, isEmergency })} disabled={!name} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name ? '#4ade80' : '#b5e3e3', fontSize:'1.1rem', fontWeight:800, color: name ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
+        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'rgba(255,255,255,0.88)', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:700, color:'#1a4a44', minHeight:'60px' }}>Abbrechen</button>
       </div>
     </div>
   )
@@ -110,20 +110,20 @@ function DoctorForm({ onSave, onCancel }: { onSave: (d: Omit<Doctor,'id'>) => vo
     { value: 'other', label: 'Andere', emoji: '📞' },
   ]
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
-      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neuer Arzt / Kontakt</p>
-      <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name (z.B. Dr. Müller)" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
-      <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Telefonnummer" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #7ececa' }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>➕ Neuer Arzt / Kontakt</p>
+      <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name (z.B. Dr. Müller)" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }} />
+      <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Telefonnummer" className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }} />
       <div className="grid gap-2" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
         {types.map(t => (
-          <button key={t.value} onClick={() => setType(t.value)} className="flex flex-col items-center justify-center rounded-2xl py-3 gap-1" style={{ backgroundColor: type === t.value ? '#e8a0a0' : '#fff', border: `2px solid ${type === t.value ? '#c87070' : '#e8d0d0'}`, fontSize:'0.85rem', fontWeight:700, color: type === t.value ? '#fff' : '#6b4a4a' }}>
+          <button key={t.value} onClick={() => setType(t.value)} className="flex flex-col items-center justify-center rounded-2xl py-3 gap-1" style={{ backgroundColor: type === t.value ? '#7ececa' : '#fff', border: `2px solid ${type === t.value ? '#2a9d8f' : '#b5e3e3'}`, fontSize:'0.85rem', fontWeight:700, color: type === t.value ? '#fff' : '#1a4a44' }}>
             <span style={{ fontSize: '1.4rem' }}>{t.emoji}</span>{t.label}
           </button>
         ))}
       </div>
       <div className="flex gap-3">
-        <button onClick={() => name && phone && onSave({ name, phone, type })} disabled={!name || !phone} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name && phone ? '#4ade80' : '#e8d0d0', fontSize:'1.1rem', fontWeight:800, color: name && phone ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
-        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:700, color:'#6b4a4a', minHeight:'60px' }}>Abbrechen</button>
+        <button onClick={() => name && phone && onSave({ name, phone, type })} disabled={!name || !phone} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name && phone ? '#4ade80' : '#b5e3e3', fontSize:'1.1rem', fontWeight:800, color: name && phone ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
+        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'rgba(255,255,255,0.88)', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:700, color:'#1a4a44', minHeight:'60px' }}>Abbrechen</button>
       </div>
     </div>
   )
@@ -135,40 +135,40 @@ function MedForm({ onSave, onCancel }: { onSave: (m: { name: string; photo: stri
   function handleFreqChange(f: 1|2|3) { setFrequency(f); setDoses(defaultDoses(f)) }
   function updateTime(i: number, t: string) { setDoses(prev => prev.map((d, idx) => idx === i ? { ...d, time: t } : d)) }
   return (
-    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}>
-      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>➕ Neues Medikament</p>
+    <div className="flex flex-col gap-4 p-4 rounded-3xl mb-3" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #7ececa' }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>➕ Neues Medikament</p>
       <div className="flex items-center gap-4">
         <PhotoPicker photo={photo} onPhoto={setPhoto} size={80} emoji="💊" />
-        <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name des Medikaments" className="flex-1 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+        <input type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Name des Medikaments" className="flex-1 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }} />
       </div>
       <div>
-        <p style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', margin:'0 0 8px' }}>Dosierung</p>
+        <p style={{ fontSize:'1rem', fontWeight:700, color:'#1a4a44', margin:'0 0 8px' }}>Dosierung</p>
         <div className="flex gap-2 flex-wrap">
-          {['½ Tablette','1 Tablette','2 Tabletten','1 Kapsel'].map(d => <button key={d} onClick={() => setDosage(d)} className="rounded-xl px-3 py-2" style={{ backgroundColor: dosage===d ? '#e8a0a0' : '#fff', border:`2px solid ${dosage===d ? '#c87070' : '#e8d0d0'}`, fontSize:'0.9rem', fontWeight:700, color: dosage===d ? '#fff' : '#6b4a4a' }}>{d}</button>)}
+          {['½ Tablette','1 Tablette','2 Tabletten','1 Kapsel'].map(d => <button key={d} onClick={() => setDosage(d)} className="rounded-xl px-3 py-2" style={{ backgroundColor: dosage===d ? '#7ececa' : '#fff', border:`2px solid ${dosage===d ? '#2a9d8f' : '#b5e3e3'}`, fontSize:'0.9rem', fontWeight:700, color: dosage===d ? '#fff' : '#1a4a44' }}>{d}</button>)}
         </div>
-        <input type="text" value={dosage} onChange={e => setDosage(e.target.value)} placeholder="Andere..." className="w-full rounded-2xl px-4 py-2 mt-2" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', fontSize:'1rem', color:'#2d1a1a', outline:'none' }} />
+        <input type="text" value={dosage} onChange={e => setDosage(e.target.value)} placeholder="Andere..." className="w-full rounded-2xl px-4 py-2 mt-2" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3', fontSize:'1rem', color:'#0d2b27', outline:'none' }} />
       </div>
       <div>
-        <p style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', margin:'0 0 8px' }}>Häufigkeit täglich</p>
+        <p style={{ fontSize:'1rem', fontWeight:700, color:'#1a4a44', margin:'0 0 8px' }}>Häufigkeit täglich</p>
         <div className="flex gap-3">
-          {([1,2,3] as const).map(f => <button key={f} onClick={() => handleFreqChange(f)} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: frequency===f ? '#e8a0a0' : '#fff', border:`2px solid ${frequency===f ? '#c87070' : '#e8d0d0'}`, fontSize:'1.3rem', fontWeight:800, color: frequency===f ? '#fff' : '#6b4a4a', minHeight:'70px' }}>{f}×</button>)}
+          {([1,2,3] as const).map(f => <button key={f} onClick={() => handleFreqChange(f)} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: frequency===f ? '#7ececa' : '#fff', border:`2px solid ${frequency===f ? '#2a9d8f' : '#b5e3e3'}`, fontSize:'1.3rem', fontWeight:800, color: frequency===f ? '#fff' : '#1a4a44', minHeight:'70px' }}>{f}×</button>)}
         </div>
       </div>
       <div>
-        <p style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', margin:'0 0 8px' }}>Uhrzeiten</p>
+        <p style={{ fontSize:'1rem', fontWeight:700, color:'#1a4a44', margin:'0 0 8px' }}>Uhrzeiten</p>
         <div className="flex flex-col gap-2">
           {doses.map((dose, i) => (
-            <div key={i} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
-              <span style={{ fontSize:'1rem', fontWeight:700, color:'#6b4a4a', minWidth:'80px' }}>{i===0?'🌅 1.':i===1?'☀️ 2.':'🌙 3.'} Einnahme</span>
-              <input type="time" value={dose.time} onChange={e => updateTime(i, e.target.value)} style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+            <div key={i} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3' }}>
+              <span style={{ fontSize:'1rem', fontWeight:700, color:'#1a4a44', minWidth:'80px' }}>{i===0?'🌅 1.':i===1?'☀️ 2.':'🌙 3.'} Einnahme</span>
+              <input type="time" value={dose.time} onChange={e => updateTime(i, e.target.value)} style={{ fontSize:'1.1rem', fontWeight:700, color:'#0d2b27', border:'none', backgroundColor:'transparent', outline:'none' }} />
             </div>
           ))}
         </div>
       </div>
-      <input type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Hinweise..." className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', fontSize:'1rem', color:'#2d1a1a', outline:'none' }} />
+      <input type="text" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Hinweise..." className="w-full rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3', fontSize:'1rem', color:'#0d2b27', outline:'none' }} />
       <div className="flex gap-3">
-        <button onClick={() => name && onSave({ name, photo, barcode:null, frequency, doses, dosage, notes })} disabled={!name} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name ? '#4ade80' : '#e8d0d0', fontSize:'1.1rem', fontWeight:800, color: name ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
-        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:700, color:'#6b4a4a', minHeight:'60px' }}>Abbrechen</button>
+        <button onClick={() => name && onSave({ name, photo, barcode:null, frequency, doses, dosage, notes })} disabled={!name} className="flex-1 rounded-2xl py-4" style={{ backgroundColor: name ? '#4ade80' : '#b5e3e3', fontSize:'1.1rem', fontWeight:800, color: name ? '#14532d' : '#999', minHeight:'60px' }}>Speichern</button>
+        <button onClick={onCancel} className="flex-1 rounded-2xl py-4" style={{ backgroundColor:'rgba(255,255,255,0.88)', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:700, color:'#1a4a44', minHeight:'60px' }}>Abbrechen</button>
       </div>
     </div>
   )
@@ -188,7 +188,7 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
   return (
     <div className="screen">
       <Header title="⚙️ Einstellungen" onBack={() => { lockSettings(); onBack() }}
-        rightAction={<button onClick={lockSettings} className="flex items-center justify-center rounded-2xl" style={{ width:'56px', height:'56px', backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0' }}><Lock size={24} color="#6b4a4a" /></button>}
+        rightAction={<button onClick={lockSettings} className="flex items-center justify-center rounded-2xl" style={{ width:'56px', height:'56px', backgroundColor:'rgba(255,255,255,0.88)', border:'2px solid #7ececa' }}><Lock size={24} color="#1a4a44" /></button>}
       />
 
       {deleteConfirm && (
@@ -209,15 +209,15 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
         <section>
           <SectionTitle title="👤 Persönliche Daten" />
           <div className="flex flex-col gap-3">
-            <input type="text" value={state.userName} onChange={e => updateState(s => ({ ...s, userName: e.target.value }))} placeholder="Dein Name" className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.2rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
-            <input type="text" value={state.weatherCity} onChange={e => updateState(s => ({ ...s, weatherCity: e.target.value }))} placeholder="Wetter-Stadt (z.B. Berlin)" className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.1rem', fontWeight:600, color:'#2d1a1a', outline:'none' }} />
+            <input type="text" value={state.userName} onChange={e => updateState(s => ({ ...s, userName: e.target.value }))} placeholder="Dein Name" className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.2rem', fontWeight:600, color:'#0d2b27', outline:'none' }} />
+            <input type="text" value={state.weatherCity} onChange={e => updateState(s => ({ ...s, weatherCity: e.target.value }))} placeholder="Wetter-Stadt (z.B. Berlin)" className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }} />
           </div>
         </section>
 
         {/* PIN */}
         <section>
           <SectionTitle title="🔐 Admin PIN" />
-          <input type="password" value={state.adminPin} onChange={e => updateState(s => ({ ...s, adminPin: e.target.value }))} maxLength={4} className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8a0a0', fontSize:'1.3rem', letterSpacing:'8px', fontWeight:700, color:'#2d1a1a', outline:'none' }} />
+          <input type="password" value={state.adminPin} onChange={e => updateState(s => ({ ...s, adminPin: e.target.value }))} maxLength={4} className="w-full rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.3rem', letterSpacing:'8px', fontWeight:700, color:'#0d2b27', outline:'none' }} />
         </section>
 
         {/* Check-in */}
@@ -226,17 +226,17 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
           <div className="flex flex-col gap-3">
             <button onClick={() => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, enabled: !s.reminders.checkIn.enabled } } }))}
               className="flex items-center justify-between rounded-2xl px-4 py-4"
-              style={{ backgroundColor: state.reminders.checkIn.enabled ? '#dcfce7' : '#f8e8e8', border: `2px solid ${state.reminders.checkIn.enabled ? '#86efac' : '#e8d0d0'}` }}>
-              <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{state.reminders.checkIn.enabled ? '✅ Check-in aktiv' : '⬜ Check-in aus'}</span>
+              style={{ backgroundColor: state.reminders.checkIn.enabled ? '#dcfce7' : '#f8e8e8', border: `2px solid ${state.reminders.checkIn.enabled ? '#86efac' : '#b5e3e3'}` }}>
+              <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#0d2b27' }}>{state.reminders.checkIn.enabled ? '✅ Check-in aktiv' : '⬜ Check-in aus'}</span>
               <span style={{ fontSize:'1.4rem' }}>{state.reminders.checkIn.enabled ? '🟢' : '⚪'}</span>
             </button>
-            <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
-              <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>⏰ Erinnerung um</span>
-              <input type="time" value={state.reminders.checkIn.time} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, time: e.target.value } } }))} style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+            <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3' }}>
+              <span style={{ fontSize:'1rem', fontWeight:700, color:'#0d2b27' }}>⏰ Erinnerung um</span>
+              <input type="time" value={state.reminders.checkIn.time} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, time: e.target.value } } }))} style={{ fontSize:'1.1rem', fontWeight:700, color:'#0d2b27', border:'none', backgroundColor:'transparent', outline:'none' }} />
             </div>
-            <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
-              <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>📱 SMS nach</span>
-              <select value={state.reminders.checkIn.alertDelayMinutes} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, alertDelayMinutes: Number(e.target.value) } } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }}>
+            <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3' }}>
+              <span style={{ fontSize:'1rem', fontWeight:700, color:'#0d2b27' }}>📱 SMS nach</span>
+              <select value={state.reminders.checkIn.alertDelayMinutes} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, checkIn: { ...s.reminders.checkIn, alertDelayMinutes: Number(e.target.value) } } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#0d2b27', border:'none', backgroundColor:'transparent', outline:'none' }}>
                 {[30,60,90,120].map(m => <option key={m} value={m}>{m} Minuten</option>)}
               </select>
             </div>
@@ -249,18 +249,18 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
           <div className="flex flex-col gap-3">
             <button onClick={() => updateState(s => ({ ...s, nightMode: { ...s.nightMode, enabled: !s.nightMode.enabled } }))}
               className="flex items-center justify-between rounded-2xl px-4 py-4"
-              style={{ backgroundColor: state.nightMode.enabled ? '#1e293b' : '#f8e8e8', border: `2px solid ${state.nightMode.enabled ? '#475569' : '#e8d0d0'}` }}>
-              <span style={{ fontSize:'1.1rem', fontWeight:700, color: state.nightMode.enabled ? '#f1f5f9' : '#2d1a1a' }}>{state.nightMode.enabled ? '🌙 Nacht-Modus aktiv' : '⬜ Nacht-Modus aus'}</span>
+              style={{ backgroundColor: state.nightMode.enabled ? '#1e293b' : '#f8e8e8', border: `2px solid ${state.nightMode.enabled ? '#475569' : '#b5e3e3'}` }}>
+              <span style={{ fontSize:'1.1rem', fontWeight:700, color: state.nightMode.enabled ? '#f1f5f9' : '#0d2b27' }}>{state.nightMode.enabled ? '🌙 Nacht-Modus aktiv' : '⬜ Nacht-Modus aus'}</span>
               <span style={{ fontSize:'1.4rem' }}>{state.nightMode.enabled ? '🌙' : '⚪'}</span>
             </button>
             <div className="flex gap-3">
-              <div className="flex-1 flex items-center justify-between rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
-                <span style={{ fontSize:'0.95rem', fontWeight:700, color:'#6b4a4a' }}>Von</span>
-                <input type="time" value={state.nightMode.startTime} onChange={e => updateState(s => ({ ...s, nightMode: { ...s.nightMode, startTime: e.target.value } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+              <div className="flex-1 flex items-center justify-between rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3' }}>
+                <span style={{ fontSize:'0.95rem', fontWeight:700, color:'#1a4a44' }}>Von</span>
+                <input type="time" value={state.nightMode.startTime} onChange={e => updateState(s => ({ ...s, nightMode: { ...s.nightMode, startTime: e.target.value } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#0d2b27', border:'none', backgroundColor:'transparent', outline:'none' }} />
               </div>
-              <div className="flex-1 flex items-center justify-between rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
-                <span style={{ fontSize:'0.95rem', fontWeight:700, color:'#6b4a4a' }}>Bis</span>
-                <input type="time" value={state.nightMode.endTime} onChange={e => updateState(s => ({ ...s, nightMode: { ...s.nightMode, endTime: e.target.value } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+              <div className="flex-1 flex items-center justify-between rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3' }}>
+                <span style={{ fontSize:'0.95rem', fontWeight:700, color:'#1a4a44' }}>Bis</span>
+                <input type="time" value={state.nightMode.endTime} onChange={e => updateState(s => ({ ...s, nightMode: { ...s.nightMode, endTime: e.target.value } }))} style={{ fontSize:'1rem', fontWeight:700, color:'#0d2b27', border:'none', backgroundColor:'transparent', outline:'none' }} />
               </div>
             </div>
           </div>
@@ -284,11 +284,11 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
             {state.doctors.map(d => {
               const emojis: Record<DoctorType, string> = { notarzt:'🚨', hausarzt:'👨‍⚕️', apotheke:'💊', other:'📞' }
               return (
-                <div key={d.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', minHeight:'70px' }}>
+                <div key={d.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3', minHeight:'70px' }}>
                   <span style={{ fontSize:'1.6rem' }}>{emojis[d.type]}</span>
                   <div className="flex flex-col flex-1">
-                    <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{d.name}</span>
-                    <span style={{ fontSize:'0.9rem', color:'#6b4a4a' }}>{d.phone}</span>
+                    <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#0d2b27' }}>{d.name}</span>
+                    <span style={{ fontSize:'0.9rem', color:'#1a4a44' }}>{d.phone}</span>
                   </div>
                   <button onClick={() => setDeleteConfirm({ type:'doctor', id:d.id })} className="rounded-xl p-3" style={{ backgroundColor:'#fef2f2' }}>
                     <Trash2 size={22} color="#dc2626" />
@@ -305,13 +305,13 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
           {showContactForm && <ContactForm onSave={c => { addContact(c); setShowContactForm(false) }} onCancel={() => setShowContactForm(false)} />}
           <div className="flex flex-col gap-3">
             {state.contacts.map(c => (
-              <div key={c.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', minHeight:'70px' }}>
-                <div className="rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width:'50px', height:'50px', backgroundColor:'#f8e8e8', border:'2px solid #e8a0a0' }}>
+              <div key={c.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3', minHeight:'70px' }}>
+                <div className="rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width:'50px', height:'50px', backgroundColor:'rgba(255,255,255,0.88)', border:'2px solid #7ececa' }}>
                   {c.photo ? <img src={c.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : <span style={{ fontSize:'1.5rem' }}>👤</span>}
                 </div>
                 <div className="flex flex-col flex-1">
-                  <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{c.name}</span>
-                  {c.phone && <span style={{ fontSize:'0.9rem', color:'#6b4a4a' }}>{c.phone}</span>}
+                  <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#0d2b27' }}>{c.name}</span>
+                  {c.phone && <span style={{ fontSize:'0.9rem', color:'#1a4a44' }}>{c.phone}</span>}
                   {c.isEmergency && <span style={{ fontSize:'0.85rem', color:'#dc2626', fontWeight:700 }}>🚨 Notfallkontakt</span>}
                 </div>
                 <button onClick={() => setDeleteConfirm({ type:'contact', id:c.id })} className="rounded-xl p-3" style={{ backgroundColor:'#fef2f2' }}>
@@ -328,13 +328,13 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
           {showMedForm && <MedForm onSave={m => { addMedication(m); setShowMedForm(false) }} onCancel={() => setShowMedForm(false)} />}
           <div className="flex flex-col gap-3">
             {state.medications.map(m => (
-              <div key={m.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0', minHeight:'70px' }}>
-                <div className="rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width:'50px', height:'50px', backgroundColor:'#f8e8e8' }}>
+              <div key={m.id} className="flex items-center gap-3 rounded-2xl px-4 py-3" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3', minHeight:'70px' }}>
+                <div className="rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width:'50px', height:'50px', backgroundColor:'rgba(255,255,255,0.88)' }}>
                   {m.photo ? <img src={m.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} /> : <span style={{ fontSize:'1.5rem' }}>💊</span>}
                 </div>
                 <div className="flex flex-col flex-1">
-                  <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a' }}>{m.name}</span>
-                  <span style={{ fontSize:'0.85rem', color:'#6b4a4a' }}>{m.dosage} · {m.frequency}× täglich · {m.doses.map(d=>d.time).join(', ')} Uhr</span>
+                  <span style={{ fontSize:'1.1rem', fontWeight:700, color:'#0d2b27' }}>{m.name}</span>
+                  <span style={{ fontSize:'0.85rem', color:'#1a4a44' }}>{m.dosage} · {m.frequency}× täglich · {m.doses.map(d=>d.time).join(', ')} Uhr</span>
                 </div>
                 <button onClick={() => setDeleteConfirm({ type:'med', id:m.id })} className="rounded-xl p-3" style={{ backgroundColor:'#fef2f2' }}>
                   <Trash2 size={22} color="#dc2626" />
@@ -347,9 +347,9 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
         {/* OK Erinnerung */}
         <section>
           <SectionTitle title="🔔 OK-Erinnerung" />
-          <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #e8d0d0' }}>
-            <span style={{ fontSize:'1rem', fontWeight:700, color:'#2d1a1a' }}>✅ Täglich um</span>
-            <input type="time" value={state.reminders.okReminderTime} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, okReminderTime: e.target.value } }))} style={{ fontSize:'1.1rem', fontWeight:700, color:'#2d1a1a', border:'none', backgroundColor:'transparent', outline:'none' }} />
+          <div className="flex items-center justify-between rounded-2xl px-4 py-4" style={{ backgroundColor:'#fff', border:'2px solid #b5e3e3' }}>
+            <span style={{ fontSize:'1rem', fontWeight:700, color:'#0d2b27' }}>✅ Täglich um</span>
+            <input type="time" value={state.reminders.okReminderTime} onChange={e => updateState(s => ({ ...s, reminders: { ...s.reminders, okReminderTime: e.target.value } }))} style={{ fontSize:'1.1rem', fontWeight:700, color:'#0d2b27', border:'none', backgroundColor:'transparent', outline:'none' }} />
           </div>
         </section>
 

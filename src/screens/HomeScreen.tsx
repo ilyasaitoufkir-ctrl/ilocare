@@ -20,18 +20,18 @@ export function HomeScreen({ onNavigate, userName }: HomeScreenProps) {
   return (
     <div
       className="flex flex-col min-h-screen"
-      style={{ backgroundColor: '#fdf6f0', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
+      style={{ backgroundColor: 'transparent', paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       {/* Logo & Begrüßung */}
       <div
         className="flex flex-col items-center justify-center py-8 px-6"
-        style={{ backgroundColor: '#f8e8e8', borderBottom: '3px solid #e8a0a0' }}
+        style={{ backgroundColor: 'rgba(255,255,255,0.88)', borderBottom: '3px solid #7ececa' }}
       >
         <div style={{ fontSize: '3.5rem' }}>🌸</div>
-        <h1 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#2d1a1a', margin: '8px 0 4px' }}>
+        <h1 style={{ fontSize: '2.2rem', fontWeight: 900, color: '#0d2b27', margin: '8px 0 4px' }}>
           ilocare
         </h1>
-        <p style={{ fontSize: '1.2rem', color: '#6b4a4a', margin: 0 }}>
+        <p style={{ fontSize: '1.2rem', color: '#1a4a44', margin: 0 }}>
           {greeting}, {userName}! 😊
         </p>
       </div>
@@ -52,7 +52,7 @@ export function HomeScreen({ onNavigate, userName }: HomeScreenProps) {
             }}
           >
             <span style={{ fontSize: '2.8rem' }}>{item.emoji}</span>
-            <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#2d1a1a' }}>
+            <span style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0d2b27' }}>
               {item.label}
             </span>
           </button>
@@ -64,10 +64,10 @@ export function HomeScreen({ onNavigate, userName }: HomeScreenProps) {
         <button
           onClick={() => onNavigate('settings')}
           className="w-full flex items-center justify-center rounded-2xl py-4"
-          style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}
+          style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #7ececa' }}
         >
           <span style={{ fontSize: '1.2rem' }}>⚙️</span>
-          <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#6b4a4a', marginLeft: '8px' }}>
+          <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1a4a44', marginLeft: '8px' }}>
             Einstellungen
           </span>
         </button>

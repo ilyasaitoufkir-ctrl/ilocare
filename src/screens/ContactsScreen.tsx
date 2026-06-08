@@ -62,25 +62,30 @@ function ContactCard({ contact }: { contact: Contact }) {
 
   return (
     <div
-      className="rounded-3xl p-5 flex flex-col gap-4 shadow-md"
-      style={{ backgroundColor: '#ffffff', border: '2px solid #e8d0d0' }}
+      className="rounded-3xl p-5 flex flex-col gap-4"
+      style={{
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+        border: '1.5px solid rgba(255,255,255,0.65)',
+        boxShadow: '0 4px 20px rgba(42,157,143,0.12)',
+      }}
     >
       {/* Foto & Name */}
       <div className="flex flex-col items-center gap-2">
         <div
           className="rounded-full overflow-hidden flex items-center justify-center"
-          style={{ width: '110px', height: '110px', backgroundColor: '#f8e8e8', border: '4px solid #e8a0a0' }}
+          style={{ width: '110px', height: '110px', backgroundColor: 'rgba(255,255,255,0.88)', border: '4px solid #7ececa' }}
         >
           {contact.photo
             ? <img src={contact.photo} alt={contact.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             : <span style={{ fontSize: '3.5rem' }}>👤</span>
           }
         </div>
-        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>
+        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>
           {contact.name}
         </p>
         {contact.phone && (
-          <p style={{ fontSize: '1rem', color: '#c87070', margin: 0 }}>{contact.phone}</p>
+          <p style={{ fontSize: '1rem', color: '#2a9d8f', margin: 0 }}>{contact.phone}</p>
         )}
         {contact.isEmergency && (
           <span
@@ -168,7 +173,7 @@ export function ContactsScreen({ contacts, onBack }: ContactsScreenProps) {
         {contacts.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20 gap-4">
             <span style={{ fontSize: '4rem' }}>👥</span>
-            <p style={{ fontSize: '1.2rem', color: '#6b4a4a', textAlign: 'center', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '1.2rem', color: '#1a4a44', textAlign: 'center', lineHeight: 1.6 }}>
               Noch keine Kontakte.{'\n'}Bitte in den Einstellungen hinzufügen.
             </p>
           </div>

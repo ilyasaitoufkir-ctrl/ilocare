@@ -78,7 +78,7 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
       <div className="screen">
         <Header title="💬 Nachrichten" onBack={onBack} />
         <div className="scroll-zone" style={{ padding: '12px 16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <p style={{ fontSize: '1.1rem', color: '#6b4a4a', textAlign: 'center', padding: '8px 0' }}>
+          <p style={{ fontSize: '1.1rem', color: '#1a4a44', textAlign: 'center', padding: '8px 0' }}>
             Wen möchtest du anschreiben?
           </p>
           {contacts.map(contact => (
@@ -86,11 +86,11 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
               key={contact.id}
               onClick={() => setSelectedContact(contact)}
               className="flex items-center gap-4 rounded-3xl p-5 active:scale-95 transition-transform"
-              style={{ backgroundColor: '#ffffff', border: '2px solid #e8d0d0', minHeight: '90px' }}
+              style={{ backgroundColor: '#ffffff', border: '2px solid #b5e3e3', minHeight: '90px' }}
             >
               <div
                 className="rounded-full overflow-hidden flex items-center justify-center flex-shrink-0"
-                style={{ width: '70px', height: '70px', backgroundColor: '#f8e8e8', border: '3px solid #e8a0a0' }}
+                style={{ width: '70px', height: '70px', backgroundColor: 'rgba(255,255,255,0.88)', border: '3px solid #7ececa' }}
               >
                 {contact.photo ? (
                   <img src={contact.photo} alt={contact.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -98,11 +98,11 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
                   <span style={{ fontSize: '2rem' }}>👤</span>
                 )}
               </div>
-              <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2d1a1a' }}>{contact.name}</span>
+              <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0d2b27' }}>{contact.name}</span>
             </button>
           ))}
           {contacts.length === 0 && (
-            <p style={{ fontSize: '1.2rem', color: '#6b4a4a', textAlign: 'center', padding: '32px 0' }}>
+            <p style={{ fontSize: '1.2rem', color: '#1a4a44', textAlign: 'center', padding: '32px 0' }}>
               Bitte zuerst Kontakte hinzufügen.
             </p>
           )}
@@ -123,10 +123,10 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
       <input ref={videoInputRef} type="file" accept="video/*" capture="environment" onChange={handleVideo} style={{ display: 'none' }} />
 
       {/* Kontakt oben */}
-      <div className="flex flex-col items-center py-4 gap-2" style={{ backgroundColor: '#f8e8e8', flexShrink: 0 }}>
+      <div className="flex flex-col items-center py-4 gap-2" style={{ backgroundColor: 'rgba(255,255,255,0.88)', flexShrink: 0 }}>
         <div
           className="rounded-full overflow-hidden flex items-center justify-center"
-          style={{ width: '80px', height: '80px', backgroundColor: '#ffffff', border: '4px solid #e8a0a0' }}
+          style={{ width: '80px', height: '80px', backgroundColor: '#ffffff', border: '4px solid #7ececa' }}
         >
           {selectedContact.photo ? (
             <img src={selectedContact.photo} alt={selectedContact.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -134,7 +134,7 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
             <span style={{ fontSize: '2.5rem' }}>👤</span>
           )}
         </div>
-        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>
+        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>
           {selectedContact.name}
         </p>
       </div>
@@ -162,7 +162,7 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
         >
           <Camera size={40} color="#c2410c" />
           <div className="flex flex-col items-start">
-            <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2d1a1a' }}>📸 Foto schicken</span>
+            <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0d2b27' }}>📸 Foto schicken</span>
             <span style={{ fontSize: '1rem', color: '#9a3412' }}>Kamera öffnen</span>
           </div>
         </button>
@@ -175,7 +175,7 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
         >
           <Video size={40} color="#1d4ed8" />
           <div className="flex flex-col items-start">
-            <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2d1a1a' }}>🎥 Video schicken</span>
+            <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0d2b27' }}>🎥 Video schicken</span>
             <span style={{ fontSize: '1rem', color: '#1e40af' }}>Kamera öffnen</span>
           </div>
         </button>
@@ -196,7 +196,7 @@ export function MessagesScreen({ contacts, initialContactId, onBack }: MessagesS
         >
           {recording ? <MicOff size={40} color="#dc2626" /> : <Mic size={40} color="#16a34a" />}
           <div className="flex flex-col items-start">
-            <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2d1a1a' }}>
+            <span style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0d2b27' }}>
               {recording ? '🔴 Aufnahme läuft...' : '🎤 Sprachnachricht'}
             </span>
             <span style={{ fontSize: '1rem', color: recording ? '#dc2626' : '#166534' }}>

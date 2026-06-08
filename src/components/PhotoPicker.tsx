@@ -27,8 +27,8 @@ export function PhotoPicker({ photo, onPhoto, size = 100, emoji = '👤' }: Phot
       style={{
         width: size,
         height: size,
-        backgroundColor: '#f8e8e8',
-        border: '3px solid #e8a0a0',
+        backgroundColor: 'rgba(255,255,255,0.88)',
+        border: '3px solid #7ececa',
         cursor: 'pointer',
       }}
     >

@@ -177,8 +177,8 @@ export function EmergencyScreen({ contacts, userName, onBack }: EmergencyScreenP
         )}
 
         {/* GPS Hinweis */}
-        <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8d0d0' }}>
-          <p style={{ fontSize: '0.9rem', color: '#6b4a4a', margin: 0, lineHeight: 1.5, textAlign: 'center' }}>
+        <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #b5e3e3' }}>
+          <p style={{ fontSize: '0.9rem', color: '#1a4a44', margin: 0, lineHeight: 1.5, textAlign: 'center' }}>
             📍 Beim SOS-Alarm wird dein GPS-Standort automatisch mitgeschickt.
           </p>
         </div>

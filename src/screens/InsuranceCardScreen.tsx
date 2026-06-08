@@ -30,7 +30,7 @@ function CardPhoto({ photo, side, onCapture }: {
 
   return (
     <div className="flex flex-col gap-3">
-      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>
+      <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>
         {emoji} {label}
       </p>
       <div
@@ -53,7 +53,7 @@ function CardPhoto({ photo, side, onCapture }: {
         ) : (
           <div className="flex flex-col items-center gap-3 p-8">
             <span style={{ fontSize: '3rem' }}>📸</span>
-            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#c87070', margin: 0, textAlign: 'center' }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2a9d8f', margin: 0, textAlign: 'center' }}>
               {label} fotografieren
             </p>
           </div>
@@ -62,7 +62,7 @@ function CardPhoto({ photo, side, onCapture }: {
       <button
         onClick={() => inputRef.current?.click()}
         className="w-full rounded-2xl py-4"
-        style={{ backgroundColor: photo ? '#f8e8e8' : '#e8a0a0', border: `2px solid #e8a0a0`, fontSize: '1rem', fontWeight: 700, color: photo ? '#6b4a4a' : '#fff', minHeight: '60px' }}
+        style={{ backgroundColor: photo ? '#f8e8e8' : '#7ececa', border: `2px solid #7ececa`, fontSize: '1rem', fontWeight: 700, color: photo ? '#1a4a44' : '#fff', minHeight: '60px' }}
       >
         {photo ? '🔄 Foto ersetzen' : '📸 Foto aufnehmen'}
       </button>
@@ -124,16 +124,16 @@ export function InsuranceCardScreen({ card, onSave, onBack }: InsuranceCardScree
         {hasCard && (
           <div
             className="rounded-3xl p-5"
-            style={{ backgroundColor: '#f8e8e8', border: '3px solid #e8a0a0' }}
+            style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '3px solid #7ececa' }}
           >
-            <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: '0 0 12px', textAlign: 'center' }}>
+            <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: '0 0 12px', textAlign: 'center' }}>
               🏥 Beim Arzt zeigen
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowFront(true)}
                 className="flex-1 flex flex-col items-center justify-center rounded-2xl active:scale-95 transition-transform"
-                style={{ backgroundColor: '#e8a0a0', minHeight: '90px', gap: '6px' }}
+                style={{ backgroundColor: '#7ececa', minHeight: '90px', gap: '6px' }}
               >
                 <span style={{ fontSize: '2rem' }}>🏥</span>
                 <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff' }}>Vorderseite</span>
@@ -141,7 +141,7 @@ export function InsuranceCardScreen({ card, onSave, onBack }: InsuranceCardScree
               <button
                 onClick={() => setShowBack(true)}
                 className="flex-1 flex flex-col items-center justify-center rounded-2xl active:scale-95 transition-transform"
-                style={{ backgroundColor: '#c87070', minHeight: '90px', gap: '6px' }}
+                style={{ backgroundColor: '#2a9d8f', minHeight: '90px', gap: '6px' }}
               >
                 <span style={{ fontSize: '2rem' }}>🔢</span>
                 <span style={{ fontSize: '1rem', fontWeight: 800, color: '#fff' }}>Rückseite</span>
@@ -152,7 +152,7 @@ export function InsuranceCardScreen({ card, onSave, onBack }: InsuranceCardScree
 
         {/* Inhaber Name & Nummer */}
         <div className="flex flex-col gap-3">
-          <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0 }}>
+          <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>
             👤 Name & Kartennummer
           </p>
           <input
@@ -161,7 +161,7 @@ export function InsuranceCardScreen({ card, onSave, onBack }: InsuranceCardScree
             onChange={e => setLocal(p => ({ ...p, ownerName: e.target.value }))}
             placeholder="Name auf der Karte"
             className="w-full rounded-2xl px-4 py-4"
-            style={{ backgroundColor: '#fff', border: '2px solid #e8a0a0', fontSize: '1.1rem', color: '#2d1a1a', outline: 'none' }}
+            style={{ backgroundColor: '#fff', border: '2px solid #7ececa', fontSize: '1.1rem', color: '#0d2b27', outline: 'none' }}
           />
           <input
             type="text"
@@ -169,7 +169,7 @@ export function InsuranceCardScreen({ card, onSave, onBack }: InsuranceCardScree
             onChange={e => setLocal(p => ({ ...p, cardNumber: e.target.value }))}
             placeholder="Kartennummer (optional)"
             className="w-full rounded-2xl px-4 py-4"
-            style={{ backgroundColor: '#fff', border: '2px solid #e8d0d0', fontSize: '1.1rem', color: '#2d1a1a', outline: 'none' }}
+            style={{ backgroundColor: '#fff', border: '2px solid #b5e3e3', fontSize: '1.1rem', color: '#0d2b27', outline: 'none' }}
           />
         </div>
 
@@ -190,7 +190,7 @@ export function InsuranceCardScreen({ card, onSave, onBack }: InsuranceCardScree
           onClick={handleSave}
           className="w-full rounded-3xl py-5"
           style={{
-            backgroundColor: saved ? '#4ade80' : '#e8a0a0',
+            backgroundColor: saved ? '#4ade80' : '#7ececa',
             fontSize: '1.3rem',
             fontWeight: 900,
             color: saved ? '#14532d' : '#fff',
@@ -200,8 +200,8 @@ export function InsuranceCardScreen({ card, onSave, onBack }: InsuranceCardScree
           {saved ? '✅ Gespeichert!' : '💾 Karte speichern'}
         </button>
 
-        <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: '#f8e8e8', border: '2px solid #e8d0d0' }}>
-          <p style={{ fontSize: '0.9rem', color: '#6b4a4a', margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
+        <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #b5e3e3' }}>
+          <p style={{ fontSize: '0.9rem', color: '#1a4a44', margin: 0, textAlign: 'center', lineHeight: 1.5 }}>
             🔒 Die Karte wird sicher auf diesem Gerät gespeichert.{'\n'}Kein Upload, keine Cloud.
           </p>
         </div>

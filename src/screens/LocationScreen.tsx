@@ -17,7 +17,7 @@ function MapEmbed({ lat, lon }: { lat: number; lon: number }) {
   const zoom = 15
   const url = `https://www.openstreetmap.org/export/embed.html?bbox=${lon - 0.01},${lat - 0.008},${lon + 0.01},${lat + 0.008}&layer=mapnik&marker=${lat},${lon}`
   return (
-    <div className="rounded-3xl overflow-hidden" style={{ width: '100%', height: '280px', border: '3px solid #e8a0a0' }}>
+    <div className="rounded-3xl overflow-hidden" style={{ width: '100%', height: '280px', border: '3px solid #7ececa' }}>
       <iframe
         title="Standort"
         src={url}
@@ -86,7 +86,7 @@ export function LocationScreen({
           onClick={fetchAndShowLocation}
           disabled={loading}
           className="w-full flex flex-col items-center justify-center rounded-3xl active:scale-95 transition-transform"
-          style={{ backgroundColor: loading ? '#f8e8e8' : '#e8a0a0', border: '3px solid #c87070', minHeight: '110px', padding: '20px' }}
+          style={{ backgroundColor: loading ? '#f8e8e8' : '#7ececa', border: '3px solid #2a9d8f', minHeight: '110px', padding: '20px' }}
         >
           <span style={{ fontSize: '3rem', lineHeight: 1 }}>{loading ? '⏳' : '📍'}</span>
           <span style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fff', marginTop: '10px' }}>
@@ -107,7 +107,7 @@ export function LocationScreen({
               <p style={{ fontSize: '1rem', fontWeight: 700, color: '#166534', margin: '0 0 4px' }}>
                 📍 Zuletzt gesehen: {currentLoc.timestamp} Uhr
               </p>
-              <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#2d1a1a', margin: 0, lineHeight: 1.4 }}>
+              <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0, lineHeight: 1.4 }}>
                 {currentLoc.address}
               </p>
             </div>
@@ -130,8 +130,8 @@ export function LocationScreen({
         )}
 
         {/* Geofencing */}
-        <div className="rounded-3xl p-5" style={{ backgroundColor: '#ffffff', border: '2px solid #e8d0d0' }}>
-          <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#2d1a1a', margin: '0 0 12px' }}>
+        <div className="rounded-3xl p-5" style={{ backgroundColor: '#ffffff', border: '2px solid #b5e3e3' }}>
+          <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0d2b27', margin: '0 0 12px' }}>
             🗺️ Sicherer Bereich
           </p>
 
@@ -139,9 +139,9 @@ export function LocationScreen({
           <button
             onClick={() => onGeofenceUpdate({ ...geofence, enabled: !geofence.enabled })}
             className="w-full flex items-center justify-between rounded-2xl px-4 py-4 mb-3"
-            style={{ backgroundColor: geofence.enabled ? '#dcfce7' : '#f8e8e8', border: `2px solid ${geofence.enabled ? '#86efac' : '#e8d0d0'}` }}
+            style={{ backgroundColor: geofence.enabled ? '#dcfce7' : '#f8e8e8', border: `2px solid ${geofence.enabled ? '#86efac' : '#b5e3e3'}` }}
           >
-            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#2d1a1a' }}>
+            <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0d2b27' }}>
               {geofence.enabled ? '✅ Geofencing aktiv' : '⬜ Geofencing aus'}
             </span>
             <span style={{ fontSize: '1.4rem' }}>{geofence.enabled ? '🟢' : '⚪'}</span>
@@ -149,7 +149,7 @@ export function LocationScreen({
 
           {/* Radius */}
           <div className="flex flex-col gap-2 mb-3">
-            <p style={{ fontSize: '1rem', fontWeight: 700, color: '#6b4a4a', margin: 0 }}>
+            <p style={{ fontSize: '1rem', fontWeight: 700, color: '#1a4a44', margin: 0 }}>
               📏 Sicherer Bereich: {geofence.radiusMeters}m Radius
             </p>
             <input
@@ -159,11 +159,11 @@ export function LocationScreen({
               step={100}
               value={geofence.radiusMeters}
               onChange={e => onGeofenceUpdate({ ...geofence, radiusMeters: Number(e.target.value) })}
-              style={{ width: '100%', height: '8px', accentColor: '#e8a0a0' }}
+              style={{ width: '100%', height: '8px', accentColor: '#7ececa' }}
             />
             <div className="flex justify-between">
-              <span style={{ fontSize: '0.9rem', color: '#6b4a4a' }}>100m</span>
-              <span style={{ fontSize: '0.9rem', color: '#6b4a4a' }}>2km</span>
+              <span style={{ fontSize: '0.9rem', color: '#1a4a44' }}>100m</span>
+              <span style={{ fontSize: '0.9rem', color: '#1a4a44' }}>2km</span>
             </div>
           </div>
 
@@ -175,7 +175,7 @@ export function LocationScreen({
               </p>
             </div>
           ) : (
-            <p style={{ fontSize: '0.95rem', color: '#c87070', margin: '0 0 8px', fontWeight: 600 }}>
+            <p style={{ fontSize: '0.95rem', color: '#2a9d8f', margin: '0 0 8px', fontWeight: 600 }}>
               ⚠️ Noch kein Zuhause festgelegt
             </p>
           )}
@@ -185,7 +185,7 @@ export function LocationScreen({
             disabled={!currentLoc}
             className="w-full rounded-2xl py-4"
             style={{
-              backgroundColor: saved ? '#4ade80' : currentLoc ? '#e8a0a0' : '#e8d0d0',
+              backgroundColor: saved ? '#4ade80' : currentLoc ? '#7ececa' : '#b5e3e3',
               fontSize: '1rem', fontWeight: 700,
               color: saved ? '#14532d' : currentLoc ? '#fff' : '#999',
               minHeight: '60px',

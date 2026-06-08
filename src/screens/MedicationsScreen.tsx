@@ -34,14 +34,19 @@ function MedicationCard({ med, onTaken }: { med: Medication; onTaken: (i: number
 
   return (
     <div
-      className="rounded-3xl overflow-hidden shadow-md"
-      style={{ backgroundColor: '#ffffff', border: `3px solid ${allTaken ? '#86efac' : '#e8d0d0'}` }}
+      className="rounded-3xl overflow-hidden"
+      style={{
+        background: 'rgba(255,255,255,0.92)',
+        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+        border: `2px solid ${allTaken ? 'rgba(82,214,138,0.5)' : 'rgba(255,255,255,0.65)'}`,
+        boxShadow: '0 4px 20px rgba(42,157,143,0.12)',
+      }}
     >
       {/* Header */}
-      <div className="flex items-center gap-4 p-5" style={{ backgroundColor: allTaken ? '#f0fdf4' : '#fdf6f0' }}>
+      <div className="flex items-center gap-4 p-5" style={{ backgroundColor: allTaken ? '#f0fdf4' : 'rgba(255,255,255,0.92)' }}>
         <div
           className="rounded-2xl overflow-hidden flex items-center justify-center flex-shrink-0"
-          style={{ width: '80px', height: '80px', backgroundColor: '#f8e8e8', border: '2px solid #e8a0a0' }}
+          style={{ width: '80px', height: '80px', backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #7ececa' }}
         >
           {med.photo
             ? <img src={med.photo} alt={med.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -49,8 +54,8 @@ function MedicationCard({ med, onTaken }: { med: Medication; onTaken: (i: number
           }
         </div>
         <div className="flex flex-col flex-1">
-          <p style={{ fontSize: '1.4rem', fontWeight: 800, color: '#2d1a1a', margin: '0 0 2px' }}>{med.name}</p>
-          <p style={{ fontSize: '1rem', color: '#6b4a4a', margin: '0 0 2px', fontWeight: 600 }}>{med.dosage}</p>
+          <p style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0d2b27', margin: '0 0 2px' }}>{med.name}</p>
+          <p style={{ fontSize: '1rem', color: '#1a4a44', margin: '0 0 2px', fontWeight: 600 }}>{med.dosage}</p>
           {allTaken
             ? <span style={{ fontSize: '1rem', fontWeight: 700, color: '#16a34a' }}>✅ Heute vollständig eingenommen</span>
             : <span style={{ fontSize: '0.95rem', fontWeight: 600, color: '#c2410c' }}>{med.frequency}× täglich</span>
@@ -69,8 +74,8 @@ function MedicationCard({ med, onTaken }: { med: Medication; onTaken: (i: number
               disabled={dose.taken}
               className="flex items-center justify-between rounded-2xl px-5 transition-all active:scale-95"
               style={{
-                backgroundColor: dose.taken ? '#dcfce7' : isDue ? '#fff7ed' : '#f8e8e8',
-                border: `2px solid ${dose.taken ? '#86efac' : isDue ? '#fed7aa' : '#e8d0d0'}`,
+                backgroundColor: dose.taken ? '#dcfce7' : isDue ? '#fff7ed' : 'rgba(255,255,255,0.88)',
+                border: `2px solid ${dose.taken ? '#86efac' : isDue ? '#fed7aa' : '#b5e3e3'}`,
                 minHeight: '76px',
                 cursor: dose.taken ? 'default' : 'pointer',
               }}
@@ -78,14 +83,14 @@ function MedicationCard({ med, onTaken }: { med: Medication; onTaken: (i: number
               <div className="flex items-center gap-3">
                 {dose.taken
                   ? <CheckCircle size={28} color="#16a34a" />
-                  : <Circle size={28} color={isDue ? '#f59e0b' : '#e8a0a0'} />
+                  : <Circle size={28} color={isDue ? '#f59e0b' : '#7ececa'} />
                 }
                 <div className="flex flex-col items-start">
-                  <span style={{ fontSize: '1.2rem', fontWeight: 800, color: dose.taken ? '#16a34a' : '#2d1a1a' }}>
+                  <span style={{ fontSize: '1.2rem', fontWeight: 800, color: dose.taken ? '#16a34a' : '#0d2b27' }}>
                     {dose.time} Uhr
                   </span>
                   {!dose.taken && (
-                    <span style={{ fontSize: '0.9rem', color: isDue ? '#c2410c' : '#6b4a4a', fontWeight: 600 }}>
+                    <span style={{ fontSize: '0.9rem', color: isDue ? '#c2410c' : '#1a4a44', fontWeight: 600 }}>
                       {isDue ? '⚡ Fällig!' : getCountdown(dose.time)}
                     </span>
                   )}
@@ -95,7 +100,7 @@ function MedicationCard({ med, onTaken }: { med: Medication; onTaken: (i: number
                 <span
                   className="rounded-xl px-4 py-2"
                   style={{
-                    backgroundColor: isDue ? '#4ade80' : '#e8d0d0',
+                    backgroundColor: isDue ? '#4ade80' : '#b5e3e3',
                     fontSize: '1rem',
                     fontWeight: 800,
                     color: isDue ? '#14532d' : '#999',
@@ -111,7 +116,7 @@ function MedicationCard({ med, onTaken }: { med: Medication; onTaken: (i: number
 
       {med.notes && (
         <div className="px-4 pb-4">
-          <p style={{ fontSize: '1rem', color: '#6b4a4a', backgroundColor: '#fdf6f0', borderRadius: '12px', padding: '12px', margin: 0 }}>
+          <p style={{ fontSize: '1rem', color: '#1a4a44', backgroundColor: 'transparent', borderRadius: '12px', padding: '12px', margin: 0 }}>
             📝 {med.notes}
           </p>
         </div>
@@ -151,10 +156,10 @@ export function MedicationsScreen({ medications, onTaken, onBack }: MedicationsS
           <button
             onClick={() => setShowScanner(true)}
             className="flex items-center justify-center rounded-2xl"
-            style={{ width: '56px', height: '56px', backgroundColor: '#ffffff', border: '2px solid #e8a0a0' }}
+            style={{ width: '56px', height: '56px', backgroundColor: '#ffffff', border: '2px solid #7ececa' }}
             title="Barcode scannen"
           >
-            <QrCode size={26} color="#e8a0a0" />
+            <QrCode size={26} color="#7ececa" />
           </button>
         }
       />
@@ -172,7 +177,7 @@ export function MedicationsScreen({ medications, onTaken, onBack }: MedicationsS
         {medications.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 gap-4">
             <span style={{ fontSize: '4rem' }}>💊</span>
-            <p style={{ fontSize: '1.2rem', color: '#6b4a4a', textAlign: 'center', lineHeight: 1.6 }}>
+            <p style={{ fontSize: '1.2rem', color: '#1a4a44', textAlign: 'center', lineHeight: 1.6 }}>
               Noch keine Medikamente.{'\n'}In den Einstellungen hinzufügen.
             </p>
           </div>

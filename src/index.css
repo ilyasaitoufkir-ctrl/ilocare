@@ -14,7 +14,7 @@ html, body {
   height: 100% !important;
   margin: 0;
   padding: 0;
-  background-color: #fdf6f0;
+  background: linear-gradient(160deg, #1a7a6e 0%, #2a9d8f 25%, #52d68a 65%, #8fe03a 100%) fixed !important;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
   user-select: none;
@@ -28,7 +28,7 @@ html, body {
   overflow: hidden;
   display: flex;
   flex-direction: column;
-  background-color: #fdf6f0;
+  background: transparent;
 }
 
 /* ── Screen base – every screen fills viewport exactly ───────────────────── */
@@ -38,7 +38,7 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background-color: #fdf6f0;
+  background: transparent;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
@@ -50,6 +50,15 @@ html, body {
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   touch-action: pan-y;
+}
+
+/* ── Glass card – reusable white glassmorphism ────────────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1.5px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 0 4px 24px rgba(42, 157, 143, 0.12);
 }
 
 /* ── Global Typography & Controls ─────────────────────────────────────────── */
@@ -81,5 +90,4 @@ a { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 .safe-left   { padding-left:   env(safe-area-inset-left); }
 .safe-right  { padding-right:  env(safe-area-inset-right); }
 
-/* ── Utility – overflow hidden everywhere by default ─────────────────────── */
 .no-scroll { overflow: hidden !important; }

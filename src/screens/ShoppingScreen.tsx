@@ -79,7 +79,7 @@ export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, 
           <span style={{ fontSize: '1.2rem', fontWeight: 900, color: listening ? '#dc2626' : processing ? '#92400e' : '#16a34a' }}>
             {listening ? 'Sprechen...' : processing ? 'Claude denkt...' : 'Sprechen & Claude erkennt'}
           </span>
-          <span style={{ fontSize: '0.85rem', color: listening ? '#dc2626' : '#6b4a4a', fontWeight: 600 }}>
+          <span style={{ fontSize: '0.85rem', color: listening ? '#dc2626' : '#1a4a44', fontWeight: 600 }}>
             {listening ? 'Loslassen wenn fertig' : !supported ? '(nur manuelle Eingabe)' : 'Gedrückt halten'}
           </span>
         </button>
@@ -102,13 +102,13 @@ export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, 
             placeholder="Artikel tippen..."
             style={{
               flex: 1, borderRadius: '16px', padding: '12px 16px',
-              backgroundColor: '#fff', border: '2px solid #e8a0a0',
-              fontSize: '1.1rem', fontWeight: 600, color: '#2d1a1a', outline: 'none',
+              backgroundColor: '#fff', border: '2px solid #7ececa',
+              fontSize: '1.1rem', fontWeight: 600, color: '#0d2b27', outline: 'none',
             }}
           />
           <button
             onClick={addManual}
-            style={{ borderRadius: '16px', padding: '0 18px', backgroundColor: '#e8a0a0', fontSize: '1.4rem', minWidth: '56px', minHeight: '56px' }}
+            style={{ borderRadius: '16px', padding: '0 18px', backgroundColor: '#7ececa', fontSize: '1.4rem', minWidth: '56px', minHeight: '56px' }}
           >
             ➕
           </button>
@@ -119,13 +119,13 @@ export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, 
           <div style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
             borderRadius: '14px', padding: '10px 14px',
-            backgroundColor: '#f8e8e8', border: '2px solid #e8d0d0',
+            backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #b5e3e3',
           }}>
-            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#2d1a1a' }}>
+            <span style={{ fontSize: '1rem', fontWeight: 700, color: '#0d2b27' }}>
               🛒 {pendingItems.length} offen · {doneItems.length} ✅
             </span>
             {doneItems.length > 0 && (
-              <button onClick={onClearDone} style={{ borderRadius: '10px', padding: '6px 12px', backgroundColor: '#e8a0a0', fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>
+              <button onClick={onClearDone} style={{ borderRadius: '10px', padding: '6px 12px', backgroundColor: '#7ececa', fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}>
                 Erledigte löschen
               </button>
             )}
@@ -137,7 +137,7 @@ export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, 
           {items.length === 0 ? (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
               <span style={{ fontSize: '3.5rem' }}>🛒</span>
-              <p style={{ fontSize: '1.1rem', color: '#6b4a4a', textAlign: 'center', margin: 0, lineHeight: 1.5 }}>
+              <p style={{ fontSize: '1.1rem', color: '#1a4a44', textAlign: 'center', margin: 0, lineHeight: 1.5 }}>
                 Liste ist leer.{'\n'}Sprechen oder tippen!
               </p>
             </div>
@@ -150,12 +150,12 @@ export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, 
                   style={{
                     display: 'flex', alignItems: 'center', gap: '12px',
                     borderRadius: '16px', padding: '0 16px', minHeight: '68px',
-                    backgroundColor: '#fff', border: '2px solid #e8d0d0',
+                    backgroundColor: '#fff', border: '2px solid #b5e3e3',
                     textAlign: 'left', width: '100%', flexShrink: 0,
                   }}
                 >
-                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid #e8a0a0', flexShrink: 0 }} />
-                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: '#2d1a1a', flex: 1 }}>{item.text}</span>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '50%', border: '3px solid #7ececa', flexShrink: 0 }} />
+                  <span style={{ fontSize: '1.15rem', fontWeight: 700, color: '#0d2b27', flex: 1 }}>{item.text}</span>
                   <button onClick={e => { e.stopPropagation(); onDelete(item.id) }} style={{ padding: '8px', borderRadius: '10px', backgroundColor: '#fef2f2', flexShrink: 0 }}>
                     <Trash2 size={20} color="#dc2626" />
                   </button>
@@ -175,7 +175,7 @@ export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, 
                   <div style={{ width: '32px', height: '32px', borderRadius: '50%', backgroundColor: '#4ade80', border: '3px solid #16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                     <Check size={18} color="#fff" />
                   </div>
-                  <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#6b4a4a', flex: 1, textDecoration: 'line-through' }}>{item.text}</span>
+                  <span style={{ fontSize: '1.1rem', fontWeight: 600, color: '#1a4a44', flex: 1, textDecoration: 'line-through' }}>{item.text}</span>
                   <button onClick={e => { e.stopPropagation(); onDelete(item.id) }} style={{ padding: '8px', borderRadius: '10px', backgroundColor: 'transparent', flexShrink: 0 }}>
                     <Trash2 size={18} color="#86efac" />
                   </button>

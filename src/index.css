@@ -1,0 +1,47 @@
+@import "tailwindcss";
+
+* {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  box-sizing: border-box;
+}
+
+html {
+  overscroll-behavior: none;
+  font-size: 20px;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #fdf6f0;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100svh;
+  min-height: 100vh;
+}
+
+input, textarea, select {
+  font-size: 20px !important;
+  -webkit-appearance: none;
+}
+
+button {
+  cursor: pointer;
+  -webkit-appearance: none;
+  border: none;
+  outline: none;
+}
+
+button:active {
+  transform: scale(0.97);
+  transition: transform 0.08s ease;
+}
+
+/* Safe area for iPhone notch */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }

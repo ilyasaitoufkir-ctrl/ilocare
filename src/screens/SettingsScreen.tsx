@@ -353,6 +353,34 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
           </div>
         </section>
 
+        {/* Picnic */}
+        <section>
+          <SectionTitle title="🛒 Picnic Online-Supermarkt" />
+          <div className="flex flex-col gap-3">
+            <div className="rounded-2xl px-4 py-3" style={{ backgroundColor:'#f0fdf4', border:'2px solid #86efac' }}>
+              <p style={{ fontSize:'0.9rem', color:'#166534', margin:0, lineHeight:1.5 }}>
+                ℹ️ Zugangsdaten für automatische Bestellung über die Picnic-App.
+              </p>
+            </div>
+            <input
+              type="email"
+              value={state.picnicEmail}
+              onChange={e => updateState(s => ({ ...s, picnicEmail: e.target.value }))}
+              placeholder="Picnic E-Mail"
+              className="w-full rounded-2xl px-4 py-4"
+              style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }}
+            />
+            <input
+              type="password"
+              value={state.picnicPassword}
+              onChange={e => updateState(s => ({ ...s, picnicPassword: e.target.value }))}
+              placeholder="Picnic Passwort"
+              className="w-full rounded-2xl px-4 py-4"
+              style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.1rem', fontWeight:600, color:'#0d2b27', outline:'none' }}
+            />
+          </div>
+        </section>
+
       </div>
     </div>
   )

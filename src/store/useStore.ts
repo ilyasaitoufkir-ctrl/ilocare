@@ -34,6 +34,8 @@ const defaultState: AppState = {
   geofence: { enabled: false, radiusMeters: 500, homeLocation: null },
   nightMode: { enabled: false, startTime: '22:00', endTime: '07:00' },
   lastKnownLocation: null,
+  picnicEmail: '',
+  picnicPassword: '',
 }
 
 function loadState(): AppState {

@@ -112,6 +112,8 @@ export interface AppState {
   geofence: GeofenceSettings
   nightMode: NightModeSettings
   lastKnownLocation: SavedLocation | null
+  picnicEmail: string
+  picnicPassword: string
 }
 
 // ── API response types ───────────────────────────────────────────────────────

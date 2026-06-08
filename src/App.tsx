@@ -197,6 +197,8 @@ export default function App() {
   if (screen === 'shopping') return (
     <>{overlays}<ShoppingScreen
       items={store.state.shoppingList}
+      picnicEmail={store.state.picnicEmail}
+      picnicPassword={store.state.picnicPassword}
       onAdd={store.addShoppingItem}
       onToggle={store.toggleShoppingItem}
       onDelete={store.deleteShoppingItem}

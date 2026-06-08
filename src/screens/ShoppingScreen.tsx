@@ -1,17 +1,12 @@
 import React, { useState, useCallback } from 'react'
-import { Trash2, Check, X } from 'lucide-react'
+import { Trash2, Check } from 'lucide-react'
 import { Header } from '../components/Header'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useClaudeAI } from '../hooks/useClaudeAI'
-import { usePicnic } from '../hooks/usePicnic'
-import type { ShoppingItem, Contact } from '../types'
+import type { ShoppingItem } from '../types'
 
 interface ShoppingScreenProps {
   items: ShoppingItem[]
-  contacts: Contact[]
-  userName: string
-  picnicEmail: string
-  picnicPassword: string
   onAdd: (text: string) => void
   onToggle: (id: string) => void
   onDelete: (id: string) => void
@@ -19,147 +14,125 @@ interface ShoppingScreenProps {
   onBack: () => void
 }
 
-function ContactPicker({ contacts, onSelect, onClose }: {
-  contacts: Contact[]
-  onSelect: (phone: string, name: string) => void
-  onClose: () => void
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex flex-col items-center justify-end p-4"
-      style={{ backgroundColor: 'rgba(13,43,39,0.65)', backdropFilter: 'blur(4px)' }}>
-      <div className="w-full rounded-3xl overflow-hidden" style={{ maxWidth: '420px', backgroundColor: '#fff', boxShadow: '0 16px 48px rgba(42,157,143,0.3)' }}>
-        <div className="flex items-center justify-between px-5 py-4" style={{ background: 'linear-gradient(135deg, #1e8c7e, #2a9d8f)' }}>
-          <span style={{ fontSize: '1.2rem', fontWeight: 800, color: '#fff' }}>📱 An wen schicken?</span>
-          <button onClick={onClose} className="flex items-center justify-center rounded-full" style={{ width: '36px', height: '36px', backgroundColor: 'rgba(255,255,255,0.22)' }}>
-            <X size={20} color="#fff" />
-          </button>
-        </div>
-        <div className="flex flex-col gap-2 p-4">
-          {contacts.filter(c => c.phone).map(c => (
-            <button key={c.id} onClick={() => onSelect(c.phone, c.name)}
-              className="flex items-center gap-3 rounded-2xl px-4 active:scale-95 transition-transform"
-              style={{ backgroundColor: '#f0fdf4', border: '2px solid #86efac', minHeight: '72px' }}>
-              <div className="rounded-full overflow-hidden flex-shrink-0 flex items-center justify-center" style={{ width: '48px', height: '48px', backgroundColor: '#fff', border: '2px solid #7ececa' }}>
-                {c.photo ? <img src={c.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '1.4rem' }}>👤</span>}
-              </div>
-              <div className="flex flex-col items-start">
-                <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27' }}>{c.name}</span>
-                <span style={{ fontSize: '0.9rem', color: '#2a9d8f' }}>{c.phone}</span>
-              </div>
-            </button>
-          ))}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-export function ShoppingScreen({ items, contacts, userName, picnicEmail, picnicPassword, onAdd, onToggle, onDelete, onClearDone, onBack }: ShoppingScreenProps) {
-  const [transcript, setTranscript] = useState<string | null>(null)
-  const [processing, setProcessing] = useState(false)
-  const [aiStatus, setAiStatus] = useState<string | null>(null)
+export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, onBack }: ShoppingScreenProps) {
+  const [phase, setPhase] = useState<'idle' | 'listening' | 'thinking' | 'done'>('idle')
+  const [statusText, setStatusText] = useState('')
   const [manualInput, setManualInput] = useState('')
-  const [showContactPicker, setShowContactPicker] = useState(false)
 
-  const { extractShoppingItems, loading: aiLoading } = useClaudeAI()
-  const { orderItems, loading: picnicLoading, status: picnicStatus } = usePicnic(picnicEmail, picnicPassword)
+  const { extractShoppingItems } = useClaudeAI()
 
   const handleSpeechResult = useCallback(async (text: string) => {
-    setTranscript(text)
-    setProcessing(true)
-    setAiStatus('🤖 Claude erkennt Artikel...')
-    const extracted = await extractShoppingItems(text)
-    extracted.forEach(item => onAdd(item))
-    setAiStatus(`✅ ${extracted.length} Artikel erkannt`)
-    setProcessing(false)
-    setTimeout(() => { setAiStatus(null); setTranscript(null) }, 3000)
+    setPhase('thinking')
+    setStatusText(`🎤 „${text}"`)
+    const produkte = await extractShoppingItems(text)
+    produkte.forEach(p => onAdd(p))
+    setPhase('done')
+    setStatusText(`✅ ${produkte.length} Artikel erkannt`)
+    setTimeout(() => { setPhase('idle'); setStatusText('') }, 3000)
   }, [extractShoppingItems, onAdd])
 
   const { start, stop, listening, supported } = useSpeechRecognition(handleSpeechResult)
 
+  function handleMicDown() {
+    setPhase('listening')
+    setStatusText('')
+    start()
+  }
+
+  function handleMicUp() {
+    stop()
+    if (phase === 'listening') setPhase('thinking')
+  }
+
   function addManual() {
     const t = manualInput.trim()
     if (!t) return
-    t.split(/[,;]/).map(s => s.trim()).filter(Boolean).forEach(item => onAdd(item))
+    t.split(/[,;]/).map(s => s.trim()).filter(Boolean).forEach(p => onAdd(p))
     setManualInput('')
   }
 
-  function handleSendSMS(phone: string, name: string) {
-    setShowContactPicker(false)
-    const pendingTexts = items.filter(i => !i.done).map(i => `• ${i.text}`)
-    const liste = pendingTexts.join('\n')
-    const text = `🛒 Einkaufsliste von ${userName}:\n\n${liste}\n\nBitte besorgen 🙏`
-    window.open(`sms:${phone}&body=${encodeURIComponent(text)}`)
-  }
-
-  function handleSMSButton() {
-    const withPhone = contacts.filter(c => c.phone)
-    if (withPhone.length === 0) {
-      alert('Keine Kontakte mit Telefonnummer vorhanden.')
-      return
-    }
-    if (withPhone.length === 1) {
-      handleSendSMS(withPhone[0].phone, withPhone[0].name)
-      return
-    }
-    setShowContactPicker(true)
+  function sendSMS() {
+    const pending = items.filter(i => !i.done)
+    const liste = pending.map(i => `• ${i.text}`).join('\n')
+    const text = `🛒 Einkaufsliste:\n\n${liste}\n\nBitte besorgen 🙏`
+    window.open(`sms:&body=${encodeURIComponent(text)}`)
   }
 
   const pendingItems = items.filter(i => !i.done)
-  const doneItems   = items.filter(i => i.done)
-  const isLoading   = listening || processing || aiLoading
+  const doneItems = items.filter(i => i.done)
 
-  const activeStatus = picnicStatus || aiStatus
+  const micActive = phase === 'listening'
+  const micBusy = phase === 'thinking'
 
   return (
     <div className="screen">
-      {showContactPicker && (
-        <ContactPicker
-          contacts={contacts}
-          onSelect={handleSendSMS}
-          onClose={() => setShowContactPicker(false)}
-        />
-      )}
-
       <Header title="🛒 Einkaufsliste" onBack={onBack} />
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '12px 16px', gap: '10px' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '14px 16px', gap: '12px' }}>
 
-        {/* ── Mikrofon ─────────────────────────────────────────────────────── */}
+        {/* ── Mikrofon Button ───────────────────────────────────────────── */}
         <button
-          onPointerDown={start}
-          onPointerUp={stop}
-          onPointerLeave={listening ? stop : undefined}
-          disabled={processing || aiLoading}
+          onPointerDown={handleMicDown}
+          onPointerUp={handleMicUp}
+          onPointerLeave={listening ? handleMicUp : undefined}
+          disabled={micBusy}
           style={{
-            flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-            borderRadius: '24px', minHeight: '100px',
-            backgroundColor: listening ? '#fef2f2' : processing ? '#fef9c3' : '#f0fdf4',
-            border: `4px solid ${listening ? '#ef4444' : processing ? '#fde047' : '#4ade80'}`,
-            gap: '6px', transition: 'all 0.15s',
-            transform: listening ? 'scale(0.97)' : 'scale(1)',
+            flexShrink: 0,
+            borderRadius: '28px',
+            minHeight: '130px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            background: micActive
+              ? 'linear-gradient(135deg, #ef4444, #dc2626)'
+              : micBusy
+              ? 'linear-gradient(135deg, #fde047, #facc15)'
+              : 'linear-gradient(135deg, #2a9d8f, #7ececa)',
+            border: 'none',
+            boxShadow: micActive
+              ? '0 0 0 6px rgba(239,68,68,0.25)'
+              : micBusy
+              ? '0 0 0 6px rgba(250,204,21,0.25)'
+              : '0 6px 24px rgba(42,157,143,0.4)',
+            transform: micActive ? 'scale(0.97)' : 'scale(1)',
+            transition: 'all 0.15s',
           }}
         >
-          <span style={{ fontSize: '2.4rem', lineHeight: 1 }}>
-            {listening ? '🔴' : processing ? '🤖' : '🎤'}
+          <span style={{ fontSize: '3rem', lineHeight: 1 }}>
+            {micActive ? '🔴' : micBusy ? '🤖' : '🎤'}
           </span>
-          <span style={{ fontSize: '1.1rem', fontWeight: 900, color: listening ? '#dc2626' : processing ? '#92400e' : '#16a34a' }}>
-            {listening ? 'Sprechen...' : processing ? 'Claude denkt...' : 'Sprechen & Claude erkennt'}
+          <span style={{ fontSize: '1.3rem', fontWeight: 900, color: micBusy ? '#713f12' : '#fff' }}>
+            {micActive ? 'Sprechen...' : micBusy ? 'Claude denkt...' : 'Mikrofon halten'}
           </span>
-          <span style={{ fontSize: '0.8rem', color: listening ? '#dc2626' : '#1a4a44', fontWeight: 600 }}>
-            {listening ? 'Loslassen wenn fertig' : !supported ? '(nur manuelle Eingabe)' : 'Gedrückt halten'}
+          <span style={{ fontSize: '0.85rem', fontWeight: 600, color: micBusy ? '#713f12' : 'rgba(255,255,255,0.85)' }}>
+            {micActive
+              ? 'Loslassen wenn fertig'
+              : micBusy
+              ? 'Artikel werden erkannt...'
+              : supported
+              ? 'Gedrückt halten & sprechen'
+              : 'Nur Tipp-Eingabe möglich'}
           </span>
         </button>
 
-        {/* ── Status ───────────────────────────────────────────────────────── */}
-        {(transcript || activeStatus) && (
-          <div style={{ flexShrink: 0, borderRadius: '14px', padding: '10px 14px', backgroundColor: picnicStatus ? '#fef9c3' : '#f0fdf4', border: `2px solid ${picnicStatus ? '#fde047' : '#86efac'}` }}>
-            {transcript && <p style={{ fontSize: '0.95rem', color: '#166534', margin: '0 0 2px', fontWeight: 700 }}>🎤 „{transcript}"</p>}
-            {activeStatus && <p style={{ fontSize: '0.95rem', color: '#166534', margin: 0, fontWeight: 700 }}>{activeStatus}</p>}
+        {/* ── Status ───────────────────────────────────────────────────── */}
+        {statusText && (
+          <div style={{
+            flexShrink: 0,
+            borderRadius: '16px',
+            padding: '12px 16px',
+            backgroundColor: phase === 'done' ? '#dcfce7' : '#fef9c3',
+            border: `2px solid ${phase === 'done' ? '#86efac' : '#fde047'}`,
+          }}>
+            <p style={{ fontSize: '1rem', fontWeight: 700, color: phase === 'done' ? '#166534' : '#713f12', margin: 0 }}>
+              {statusText}
+            </p>
           </div>
         )}
 
-        {/* ── Manuelle Eingabe ─────────────────────────────────────────────── */}
+        {/* ── Manuelle Eingabe ─────────────────────────────────────────── */}
         <div style={{ flexShrink: 0, display: 'flex', gap: '8px' }}>
           <input
             type="text"
@@ -168,131 +141,163 @@ export function ShoppingScreen({ items, contacts, userName, picnicEmail, picnicP
             onKeyDown={e => e.key === 'Enter' && addManual()}
             placeholder="Artikel tippen..."
             style={{
-              flex: 1, borderRadius: '16px', padding: '12px 16px',
+              flex: 1, borderRadius: '16px', padding: '14px 16px',
               backgroundColor: '#fff', border: '2px solid #7ececa',
               fontSize: '1.1rem', fontWeight: 600, color: '#0d2b27', outline: 'none',
             }}
           />
           <button
             onClick={addManual}
-            style={{ borderRadius: '16px', padding: '0 18px', backgroundColor: '#7ececa', fontSize: '1.4rem', minWidth: '56px', minHeight: '56px' }}
+            style={{
+              borderRadius: '16px', padding: '0 20px',
+              background: 'linear-gradient(135deg, #2a9d8f, #7ececa)',
+              fontSize: '1.5rem', minWidth: '60px', minHeight: '56px',
+              border: 'none',
+            }}
           >
             ➕
           </button>
         </div>
 
-        {/* ── Zusammenfassung ─────────────────────────────────────────────── */}
+        {/* ── Zusammenfassung ──────────────────────────────────────────── */}
         {items.length > 0 && (
           <div style={{
-            flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            borderRadius: '14px', padding: '8px 14px',
+            flexShrink: 0,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            borderRadius: '14px', padding: '10px 16px',
             backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #b5e3e3',
           }}>
             <span style={{ fontSize: '1rem', fontWeight: 700, color: '#0d2b27' }}>
-              🛒 {pendingItems.length} offen · {doneItems.length} ✅
+              🛒 {pendingItems.length} offen &nbsp;·&nbsp; {doneItems.length} ✅
             </span>
             {doneItems.length > 0 && (
-              <button onClick={onClearDone} style={{ borderRadius: '10px', padding: '5px 10px', backgroundColor: '#7ececa', fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>
+              <button
+                onClick={onClearDone}
+                style={{ borderRadius: '10px', padding: '6px 14px', background: '#7ececa', border: 'none', fontSize: '0.9rem', fontWeight: 700, color: '#fff' }}
+              >
                 Erledigte löschen
               </button>
             )}
           </div>
         )}
 
-        {/* ── Aktions-Buttons ──────────────────────────────────────────────── */}
-        {pendingItems.length > 0 && (
-          <div style={{ flexShrink: 0, display: 'flex', gap: '10px' }}>
-            <button
-              onClick={() => orderItems(pendingItems.map(i => i.text))}
-              disabled={picnicLoading}
-              style={{
-                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '20px', minHeight: '80px', gap: '4px',
-                background: picnicLoading ? '#e5e7eb' : 'linear-gradient(135deg, #e8f5e9, #c8e6c9)',
-                border: `2px solid ${picnicLoading ? '#d1d5db' : '#4ade80'}`,
-                transition: 'all 0.15s',
-              }}
-            >
-              <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>🛒</span>
-              <span style={{ fontSize: '0.95rem', fontWeight: 800, color: picnicLoading ? '#9ca3af' : '#166534' }}>
-                {picnicLoading ? 'Bestelle...' : 'Bei Picnic'}
-              </span>
-              <span style={{ fontSize: '0.75rem', color: picnicLoading ? '#9ca3af' : '#166534', fontWeight: 600 }}>bestellen</span>
-            </button>
-            <button
-              onClick={handleSMSButton}
-              style={{
-                flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '20px', minHeight: '80px', gap: '4px',
-                background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)',
-                border: '2px solid #60a5fa',
-                transition: 'all 0.15s',
-              }}
-            >
-              <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>💬</span>
-              <span style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1d4ed8' }}>Per SMS</span>
-              <span style={{ fontSize: '0.75rem', color: '#1d4ed8', fontWeight: 600 }}>schicken</span>
-            </button>
-          </div>
-        )}
-
-        {/* ── Liste ────────────────────────────────────────────────────────── */}
-        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' as const, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        {/* ── Liste ────────────────────────────────────────────────────── */}
+        <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' as const, display: 'flex', flexDirection: 'column', gap: '10px', paddingBottom: '4px' }}>
           {items.length === 0 ? (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '12px' }}>
-              <span style={{ fontSize: '3.5rem' }}>🛒</span>
-              <p style={{ fontSize: '1.1rem', color: '#1a4a44', textAlign: 'center', margin: 0, lineHeight: 1.5 }}>
-                Liste ist leer.{'\n'}Sprechen oder tippen!
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: '16px' }}>
+              <span style={{ fontSize: '4rem' }}>🛒</span>
+              <p style={{ fontSize: '1.15rem', color: '#1a4a44', textAlign: 'center', margin: 0, lineHeight: 1.6, fontWeight: 600 }}>
+                Liste ist leer.{'\n'}Mikrofon halten & sprechen!
               </p>
             </div>
           ) : (
             <>
               {pendingItems.map(item => (
-                <button
+                <div
                   key={item.id}
-                  onClick={() => onToggle(item.id)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    borderRadius: '16px', padding: '0 16px', minHeight: '64px',
-                    backgroundColor: '#fff', border: '2px solid #b5e3e3',
-                    textAlign: 'left', width: '100%', flexShrink: 0,
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                    borderRadius: '18px', padding: '0 16px', minHeight: '72px',
+                    backgroundColor: '#fff',
+                    border: '2px solid #b5e3e3',
+                    boxShadow: '0 2px 8px rgba(42,157,143,0.08)',
+                    flexShrink: 0,
                   }}
                 >
-                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', border: '3px solid #7ececa', flexShrink: 0 }} />
-                  <span style={{ fontSize: '1.1rem', fontWeight: 700, color: '#0d2b27', flex: 1 }}>{item.text}</span>
-                  <button onClick={e => { e.stopPropagation(); onDelete(item.id) }} style={{ padding: '8px', borderRadius: '10px', backgroundColor: '#fef2f2', flexShrink: 0 }}>
-                    <Trash2 size={20} color="#dc2626" />
+                  <button
+                    onClick={() => onToggle(item.id)}
+                    style={{
+                      width: '34px', height: '34px', borderRadius: '50%',
+                      border: '3px solid #2a9d8f', flexShrink: 0,
+                      backgroundColor: 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  />
+                  <span
+                    onClick={() => onToggle(item.id)}
+                    style={{ fontSize: '1.2rem', fontWeight: 700, color: '#0d2b27', flex: 1, textAlign: 'left', cursor: 'pointer' }}
+                  >
+                    {item.text}
+                  </span>
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    style={{ padding: '8px', borderRadius: '12px', backgroundColor: '#fef2f2', flexShrink: 0, border: 'none' }}
+                  >
+                    <Trash2 size={22} color="#dc2626" />
                   </button>
-                </button>
+                </div>
               ))}
+
               {doneItems.map(item => (
-                <button
+                <div
                   key={item.id}
-                  onClick={() => onToggle(item.id)}
                   style={{
-                    display: 'flex', alignItems: 'center', gap: '12px',
-                    borderRadius: '16px', padding: '0 16px', minHeight: '56px',
+                    display: 'flex', alignItems: 'center', gap: '14px',
+                    borderRadius: '18px', padding: '0 16px', minHeight: '64px',
                     backgroundColor: '#f0fdf4', border: '2px solid #86efac',
-                    opacity: 0.7, textAlign: 'left', width: '100%', flexShrink: 0,
+                    opacity: 0.65, flexShrink: 0,
                   }}
                 >
-                  <div style={{ width: '30px', height: '30px', borderRadius: '50%', backgroundColor: '#4ade80', border: '3px solid #16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <Check size={16} color="#fff" />
-                  </div>
-                  <span style={{ fontSize: '1.05rem', fontWeight: 600, color: '#1a4a44', flex: 1, textDecoration: 'line-through' }}>{item.text}</span>
-                  <button onClick={e => { e.stopPropagation(); onDelete(item.id) }} style={{ padding: '8px', borderRadius: '10px', backgroundColor: 'transparent', flexShrink: 0 }}>
+                  <button
+                    onClick={() => onToggle(item.id)}
+                    style={{
+                      width: '34px', height: '34px', borderRadius: '50%',
+                      backgroundColor: '#4ade80', border: '3px solid #16a34a',
+                      flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}
+                  >
+                    <Check size={18} color="#fff" />
+                  </button>
+                  <span
+                    onClick={() => onToggle(item.id)}
+                    style={{ fontSize: '1.1rem', fontWeight: 600, color: '#166534', flex: 1, textDecoration: 'line-through', textAlign: 'left', cursor: 'pointer' }}
+                  >
+                    {item.text}
+                  </span>
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    style={{ padding: '8px', borderRadius: '12px', backgroundColor: 'transparent', flexShrink: 0, border: 'none' }}
+                  >
                     <Trash2 size={18} color="#86efac" />
                   </button>
-                </button>
+                </div>
               ))}
+
               {pendingItems.length === 0 && doneItems.length > 0 && (
-                <div style={{ borderRadius: '20px', padding: '20px', textAlign: 'center', backgroundColor: '#dcfce7', border: '3px solid #4ade80', marginTop: '8px' }}>
-                  <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#166534', margin: 0 }}>🎉 Einkauf erledigt!</p>
+                <div style={{ borderRadius: '20px', padding: '24px', textAlign: 'center', backgroundColor: '#dcfce7', border: '3px solid #4ade80', marginTop: '4px' }}>
+                  <p style={{ fontSize: '1.3rem', fontWeight: 800, color: '#166534', margin: 0 }}>🎉 Einkauf erledigt!</p>
                 </div>
               )}
             </>
           )}
         </div>
+
+        {/* ── Liste schicken Button ─────────────────────────────────────── */}
+        {pendingItems.length > 0 && (
+          <button
+            onClick={sendSMS}
+            style={{
+              flexShrink: 0,
+              borderRadius: '24px',
+              minHeight: '76px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '12px',
+              background: 'linear-gradient(135deg, #52d68a, #16a34a)',
+              border: 'none',
+              boxShadow: '0 6px 20px rgba(82,214,138,0.45)',
+            }}
+          >
+            <span style={{ fontSize: '1.8rem' }}>💬</span>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+              <span style={{ fontSize: '1.25rem', fontWeight: 900, color: '#fff' }}>Liste schicken</span>
+              <span style={{ fontSize: '0.85rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+                {pendingItems.length} Artikel per SMS senden
+              </span>
+            </div>
+          </button>
+        )}
+
       </div>
     </div>
   )

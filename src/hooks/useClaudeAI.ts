@@ -24,7 +24,7 @@ export function useClaudeAI() {
           max_tokens: 256,
           messages: [{
             role: 'user',
-            content: `Extrahiere alle Einkaufsartikel und Lebensmittel aus diesem deutschen Text. Gib nur ein JSON-Array von Strings zurück, keine Erklärung, kein Markdown, kein Text davor oder danach. Nur das Array.\n\nBeispiel:\nEingabe: "Ich brauche noch Milch und vergiss nicht das Brot"\nAusgabe: ["Milch","Brot"]\n\nText: "${text.replace(/"/g, "'")}"`
+            content: `Extrahiere alle Einkaufsartikel aus diesem deutschen Text. Antworte NUR mit einem JSON-Objekt, kein Markdown, kein Text, keine Erklärung:\n{"produkte":["Artikel1","Artikel2"]}\n\nBeispiel:\nEingabe: "Ich brauche Milch und Brot"\nAusgabe: {"produkte":["Milch","Brot"]}\n\nText: "${text.replace(/"/g, "'")}"`
           }]
         }),
       })
@@ -37,14 +37,21 @@ export function useClaudeAI() {
       const data = await res.json()
       const content = data.content?.[0]?.text ?? ''
 
-      // Extract JSON array from response
-      const match = content.match(/\[[\s\S]*?\]/)
-      if (!match) {
-        // Fallback: split by comma/und
-        return text.split(/[,\n]|\s+und\s+/i).map(s => s.trim()).filter(Boolean)
+      // Parse {"produkte": [...]} format
+      const objMatch = content.match(/\{[\s\S]*?\}/)
+      if (objMatch) {
+        const parsed = JSON.parse(objMatch[0]) as { produkte?: string[] }
+        if (Array.isArray(parsed.produkte)) {
+          return parsed.produkte.filter(i => typeof i === 'string' && i.trim().length > 0)
+        }
       }
-      const items: string[] = JSON.parse(match[0])
-      return items.filter(i => typeof i === 'string' && i.trim().length > 0)
+      // Fallback: try plain array
+      const arrMatch = content.match(/\[[\s\S]*?\]/)
+      if (arrMatch) {
+        const items: string[] = JSON.parse(arrMatch[0])
+        return items.filter(i => typeof i === 'string' && i.trim().length > 0)
+      }
+      return text.split(/[,\n]|\s+und\s+/i).map(s => s.trim()).filter(Boolean)
     } catch (e) {
       const msg = e instanceof Error ? e.message : 'Claude AI nicht verfügbar'
       setError(msg)

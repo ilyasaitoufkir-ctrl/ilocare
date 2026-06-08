@@ -13,6 +13,7 @@ import { InsuranceCardScreen } from './screens/InsuranceCardScreen'
 import { ShoppingScreen } from './screens/ShoppingScreen'
 import { DoctorsScreen } from './screens/DoctorsScreen'
 import { LocationScreen } from './screens/LocationScreen'
+import { NewsScreen } from './screens/NewsScreen'
 import { FallAlert } from './components/FallAlert'
 import { CheckInAlert } from './components/CheckInAlert'
 import { NightModeAlert } from './components/NightModeAlert'
@@ -208,6 +209,8 @@ export default function App() {
   )
 
   if (screen === 'doctors') return <>{overlays}<DoctorsScreen doctors={store.state.doctors} onBack={() => setScreen('dashboard')} /></>
+
+  if (screen === 'news') return <>{overlays}<NewsScreen onBack={() => setScreen('dashboard')} /></>
 
   if (screen === 'location') return (
     <>{overlays}<LocationScreen

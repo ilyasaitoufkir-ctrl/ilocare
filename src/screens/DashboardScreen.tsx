@@ -259,21 +259,23 @@ export function DashboardScreen({
 
         {/* ── Nachrichten (2 Schlagzeilen) ────────────────────────────────── */}
         <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <p style={{ fontSize: '0.78rem', fontWeight: 800, color: 'rgba(255,255,255,0.85)', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
-            📰 Nachrichten
-          </p>
+          <button onClick={() => onNavigate('news')} style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <p style={{ fontSize: '0.78rem', fontWeight: 800, color: 'rgba(255,255,255,0.85)', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
+              📰 Nachrichten
+            </p>
+            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>alle anzeigen →</span>
+          </button>
           {news.slice(0, 2).map((item, i) => (
-            <a key={i} href={item.link} target="_blank" rel="noopener noreferrer"
+            <button key={i} onClick={() => onNavigate('news')}
               style={{
-                display: 'block', borderRadius: '14px', padding: '9px 13px',
+                display: 'block', borderRadius: '14px', padding: '9px 13px', width: '100%', textAlign: 'left',
                 background: 'rgba(255,255,255,0.82)',
                 backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
                 border: '1.5px solid rgba(255,255,255,0.6)',
                 boxShadow: '0 2px 12px rgba(42,157,143,0.08)',
-                textDecoration: 'none',
               }}>
               <p style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0d2b27', margin: 0, lineHeight: 1.3 }}>{item.title}</p>
-            </a>
+            </button>
           ))}
         </div>
 

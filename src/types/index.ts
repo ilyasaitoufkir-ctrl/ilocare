@@ -9,6 +9,7 @@ export type Screen =
   | 'shopping'
   | 'doctors'
   | 'location'
+  | 'news'
 
 // ── Contacts ────────────────────────────────────────────────────────────────
 export interface Contact {

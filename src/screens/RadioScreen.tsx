@@ -7,12 +7,14 @@ interface RadioScreenProps {
 }
 
 const STATIONS = [
-  { name: 'Antenne Bayern', emoji: '🎵', url: 'https://stream.antenne.de/antenne', genre: 'Pop & Hits' },
-  { name: 'NDR 2',          emoji: '🎵', url: 'https://icecast.ndr.de/ndr/ndr2/niedersachsen/mp3/128/stream.mp3', genre: 'Pop & Hits' },
-  { name: 'WDR 2',          emoji: '🎵', url: 'https://wdr-wdr2-aacplus.icecast.wdr.de/wdr/wdr2/aacplus/128/stream.aac', genre: 'Pop & Hits' },
-  { name: 'SWR3',           emoji: '🎵', url: 'https://liveradio.swr.de/sw282p3/swr3/', genre: 'Rock & Pop' },
-  { name: 'Radio Hamburg',  emoji: '🎵', url: 'https://stream.radiohamburg.de/rhh-live/mp3-128/radioplayer', genre: 'Pop & Hits' },
-  { name: 'Deutschlandfunk',emoji: '📻', url: 'https://st01.sslstream.dlf.de/dlf/01/128/mp3/stream.mp3', genre: 'Nachrichten' },
+  { name: 'Antenne Bayern',     emoji: '🎵', url: 'https://stream.antenne.de/antenne/stream/mp3',                                                                          genre: 'Pop & Hits'   },
+  { name: 'NDR 2',              emoji: '🎵', url: 'https://ndr-ndr2-live.cast.addradio.de/ndr/ndr2/live/mp3/128/stream.mp3',                                               genre: 'Pop & Hits'   },
+  { name: 'SWR3',               emoji: '🎵', url: 'https://liveradio.swr.de/sw282p3/swr3/play.mp3',                                                                        genre: 'Rock & Pop'   },
+  { name: 'WDR 2',              emoji: '🎵', url: 'https://wdr-wdr2-live.icecastssl.wdr.de/wdr/wdr2/live/mp3/128/stream.mp3',                                              genre: 'Pop & Hits'   },
+  { name: 'Radio Hamburg',      emoji: '🎵', url: 'https://stream.radiohamburg.de/rhh-live/mp3-128/stream.mp3',                                                             genre: 'Pop & Hits'   },
+  { name: 'N-JOY',              emoji: '🎵', url: 'https://ndr-njoy-live.cast.addradio.de/ndr/njoy/live/mp3/128/stream.mp3',                                               genre: 'Jugend & Pop' },
+  { name: 'Radio Niedersachsen',emoji: '🎵', url: 'https://ndr-ndr1niedersachsen-hannover.cast.addradio.de/ndr/ndr1niedersachsen/hannover/mp3/128/stream.mp3',             genre: 'Regional'     },
+  { name: 'Deutschlandfunk',    emoji: '📻', url: 'https://st01.sslstream.dlf.de/dlf/01/128/mp3/stream.mp3',                                                               genre: 'Nachrichten'  },
 ]
 
 export function RadioScreen({ onBack }: RadioScreenProps) {
@@ -39,13 +41,20 @@ export function RadioScreen({ onBack }: RadioScreenProps) {
     const audio = new Audio(station.url)
     audio.volume = volume
     audio.onerror = () => {
-      setError(`${station.name} nicht erreichbar`)
       setIsPlaying(false)
+      const idx = STATIONS.findIndex(s => s.name === station.name)
+      const next = STATIONS[(idx + 1) % STATIONS.length]
+      setError(`⚠️ ${station.name} nicht verfügbar → versuche ${next.name}`)
     }
     audio.onplay = () => { setIsPlaying(true); setError(null) }
     audio.onpause = () => setIsPlaying(false)
     audioRef.current = audio
-    audio.play().catch(() => setError(`${station.name} konnte nicht gestartet werden`))
+    audio.play().catch(() => {
+      setIsPlaying(false)
+      const idx = STATIONS.findIndex(s => s.name === station.name)
+      const next = STATIONS[(idx + 1) % STATIONS.length]
+      setError(`⚠️ ${station.name} nicht verfügbar → versuche ${next.name}`)
+    })
     setActiveStation(station)
     setIsPlaying(true)
   }

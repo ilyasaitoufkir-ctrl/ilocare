@@ -5,6 +5,7 @@ const ALLOWED_FEEDS = new Set([
   'https://www.tagesschau.de/xml/rss2_thema/sport/',
   'https://www.tagesschau.de/xml/rss2_thema/wirtschaft/',
   'https://www.tagesschau.de/xml/rss2_thema/wissen/',
+  'https://www.tagesschau.de/xml/rss2_thema/kultur/',
 ])
 
 export default async function handler(req, res) {

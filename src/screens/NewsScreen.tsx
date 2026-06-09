@@ -8,12 +8,13 @@ interface NewsScreenProps {
 }
 
 const CATEGORIES = [
-  { label: '🌍 Alle',       feed: 'https://www.tagesschau.de/xml/rss2/' },
+  { label: '📰 Alle',       feed: 'https://www.tagesschau.de/xml/rss2/' },
   { label: '🏛️ Politik',    feed: 'https://www.tagesschau.de/xml/rss2_thema/inland/' },
-  { label: '✈️ Ausland',    feed: 'https://www.tagesschau.de/xml/rss2_thema/ausland/' },
+  { label: '🌍 Ausland',    feed: 'https://www.tagesschau.de/xml/rss2_thema/ausland/' },
   { label: '⚽ Sport',      feed: 'https://www.tagesschau.de/xml/rss2_thema/sport/' },
-  { label: '💼 Wirtschaft', feed: 'https://www.tagesschau.de/xml/rss2_thema/wirtschaft/' },
+  { label: '💰 Wirtschaft', feed: 'https://www.tagesschau.de/xml/rss2_thema/wirtschaft/' },
   { label: '🔬 Wissen',     feed: 'https://www.tagesschau.de/xml/rss2_thema/wissen/' },
+  { label: '🎭 Kultur',     feed: 'https://www.tagesschau.de/xml/rss2_thema/kultur/' },
 ]
 
 function formatDate(pubDate: string): string {

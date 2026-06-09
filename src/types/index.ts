@@ -10,6 +10,7 @@ export type Screen =
   | 'doctors'
   | 'location'
   | 'news'
+  | 'radio'
 
 // ── Contacts ────────────────────────────────────────────────────────────────
 export interface Contact {

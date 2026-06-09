@@ -14,6 +14,7 @@ import { ShoppingScreen } from './screens/ShoppingScreen'
 import { DoctorsScreen } from './screens/DoctorsScreen'
 import { LocationScreen } from './screens/LocationScreen'
 import { NewsScreen } from './screens/NewsScreen'
+import { RadioScreen } from './screens/RadioScreen'
 import { FallAlert } from './components/FallAlert'
 import { CheckInAlert } from './components/CheckInAlert'
 import { NightModeAlert } from './components/NightModeAlert'
@@ -109,9 +110,13 @@ export default function App() {
   const handleFallSOS = useCallback(() => {
     const phones = store.state.contacts.map(c => c.phone).filter(Boolean).join(',')
     if (!phones) return
-    const msg = `🚨 STURZ ERKANNT! ${store.state.userName} könnte gestürzt sein! Bitte sofort melden! ⏰ ${getCurrentTime()} Uhr`
+    const loc = store.state.lastKnownLocation
+    const locationPart = loc
+      ? `\n📍 Standort: https://maps.google.com/maps?q=${loc.lat},${loc.lon}`
+      : ''
+    const msg = `🚨 STURZ ERKANNT! ${store.state.userName} könnte gestürzt sein! Bitte sofort melden! ⏰ ${getCurrentTime()} Uhr${locationPart}`
     window.location.href = `sms:${phones}?body=${encodeURIComponent(msg)}`
-  }, [store.state.contacts, store.state.userName])
+  }, [store.state.contacts, store.state.userName, store.state.lastKnownLocation])
 
   const { fallState, dismiss: dismissFall } = useFallDetection(fallDetectionEnabled, handleFallSOS)
 
@@ -211,6 +216,8 @@ export default function App() {
   if (screen === 'doctors') return <>{overlays}<DoctorsScreen doctors={store.state.doctors} onBack={() => setScreen('dashboard')} /></>
 
   if (screen === 'news') return <>{overlays}<NewsScreen onBack={() => setScreen('dashboard')} /></>
+
+  if (screen === 'radio') return <>{overlays}<RadioScreen onBack={() => setScreen('dashboard')} /></>
 
   if (screen === 'location') return (
     <>{overlays}<LocationScreen

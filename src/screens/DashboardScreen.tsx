@@ -257,6 +257,26 @@ export function DashboardScreen({
           ))}
         </div>
 
+        {/* ── Radio Button ────────────────────────────────────────────────── */}
+        <button
+          onClick={() => onNavigate('radio')}
+          style={{
+            flexShrink: 0, width: '100%', borderRadius: '18px',
+            padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '14px',
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75))',
+            backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
+            border: '1.5px solid rgba(255,255,255,0.65)',
+            boxShadow: '0 3px 14px rgba(42,157,143,0.12)',
+          }}
+        >
+          <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>📻</span>
+          <div style={{ flex: 1, textAlign: 'left' }}>
+            <p style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>Radio</p>
+            <p style={{ fontSize: '0.75rem', color: '#1a4a44', margin: 0, fontWeight: 600 }}>Antenne Bayern · NDR 2 · SWR3…</p>
+          </div>
+          <span style={{ fontSize: '1.2rem' }}>▶️</span>
+        </button>
+
         {/* ── Nachrichten (2 Schlagzeilen) ────────────────────────────────── */}
         <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
           <button onClick={() => onNavigate('news')} style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>

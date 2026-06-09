@@ -3,13 +3,10 @@ import { Trash2, Check } from 'lucide-react'
 import { Header } from '../components/Header'
 import { useSpeechRecognition } from '../hooks/useSpeechRecognition'
 import { useClaudeAI } from '../hooks/useClaudeAI'
-import { usePicnic } from '../hooks/usePicnic'
 import type { ShoppingItem } from '../types'
 
 interface ShoppingScreenProps {
   items: ShoppingItem[]
-  picnicEmail: string
-  picnicPassword: string
   onAdd: (text: string) => void
   onToggle: (id: string) => void
   onDelete: (id: string) => void
@@ -17,13 +14,12 @@ interface ShoppingScreenProps {
   onBack: () => void
 }
 
-export function ShoppingScreen({ items, picnicEmail, picnicPassword, onAdd, onToggle, onDelete, onClearDone, onBack }: ShoppingScreenProps) {
+export function ShoppingScreen({ items, onAdd, onToggle, onDelete, onClearDone, onBack }: ShoppingScreenProps) {
   const [phase, setPhase] = useState<'idle' | 'listening' | 'thinking' | 'done'>('idle')
   const [statusText, setStatusText] = useState('')
   const [manualInput, setManualInput] = useState('')
 
   const { extractShoppingItems } = useClaudeAI()
-  const { orderItems, loading: picnicLoading, status: picnicStatus } = usePicnic(picnicEmail, picnicPassword)
 
   const handleSpeechResult = useCallback(async (text: string) => {
     setPhase('thinking')
@@ -67,7 +63,7 @@ export function ShoppingScreen({ items, picnicEmail, picnicPassword, onAdd, onTo
 
   const micActive = phase === 'listening'
   const micBusy = phase === 'thinking'
-  const activeStatus = picnicStatus || (statusText ? statusText : null)
+  const activeStatus = statusText ? statusText : null
 
   return (
     <div className="screen">
@@ -128,10 +124,10 @@ export function ShoppingScreen({ items, picnicEmail, picnicPassword, onAdd, onTo
             flexShrink: 0,
             borderRadius: '16px',
             padding: '12px 16px',
-            backgroundColor: activeStatus.startsWith('❌') ? '#fef2f2' : phase === 'done' || picnicStatus?.startsWith('✅') ? '#dcfce7' : '#fef9c3',
-            border: `2px solid ${activeStatus.startsWith('❌') ? '#fca5a5' : phase === 'done' || picnicStatus?.startsWith('✅') ? '#86efac' : '#fde047'}`,
+            backgroundColor: activeStatus.startsWith('❌') ? '#fef2f2' : phase === 'done' ? '#dcfce7' : '#fef9c3',
+            border: `2px solid ${activeStatus.startsWith('❌') ? '#fca5a5' : phase === 'done' ? '#86efac' : '#fde047'}`,
           }}>
-            <p style={{ fontSize: '0.95rem', fontWeight: 700, color: activeStatus.startsWith('❌') ? '#dc2626' : phase === 'done' || picnicStatus?.startsWith('✅') ? '#166534' : '#713f12', margin: 0 }}>
+            <p style={{ fontSize: '0.95rem', fontWeight: 700, color: activeStatus.startsWith('❌') ? '#dc2626' : phase === 'done' ? '#166534' : '#713f12', margin: 0 }}>
               {activeStatus}
             </p>
           </div>
@@ -279,34 +275,6 @@ export function ShoppingScreen({ items, picnicEmail, picnicPassword, onAdd, onTo
         {/* ── Aktions-Buttons ──────────────────────────────────────────── */}
         {pendingItems.length > 0 && (
           <div style={{ flexShrink: 0, display: 'flex', gap: '10px' }}>
-            {/* Picnic bestellen */}
-            <button
-              onClick={() => orderItems(pendingItems.map(i => i.text))}
-              disabled={picnicLoading}
-              style={{
-                flex: 1,
-                borderRadius: '20px',
-                minHeight: '76px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '4px',
-                background: picnicLoading
-                  ? 'linear-gradient(135deg, #d1fae5, #a7f3d0)'
-                  : 'linear-gradient(135deg, #2a9d8f, #7ececa)',
-                border: 'none',
-                boxShadow: '0 4px 16px rgba(42,157,143,0.35)',
-                opacity: picnicLoading ? 0.7 : 1,
-              }}
-            >
-              <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>{picnicLoading ? '⏳' : '🛒'}</span>
-              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#fff' }}>
-                {picnicLoading ? 'Bestelle...' : 'Picnic'}
-              </span>
-              <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>bestellen</span>
-            </button>
-
             {/* SMS schicken */}
             <button
               onClick={sendSMS}

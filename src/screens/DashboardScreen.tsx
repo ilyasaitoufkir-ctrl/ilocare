@@ -169,32 +169,49 @@ export function DashboardScreen({
         overflow: 'hidden', padding: '10px 12px', gap: '8px',
       }}>
 
-        {/* ── OK Button ───────────────────────────────────────────────────── */}
-        {okSent ? (
-          <div style={{
-            flexShrink: 0, borderRadius: '18px', padding: '14px', textAlign: 'center',
-            background: 'linear-gradient(135deg, #52d68a, #8fe03a)',
-            boxShadow: '0 6px 20px rgba(82,214,138,0.4)',
-          }}>
-            <p style={{ fontSize: '1.1rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>✅ Familie wurde informiert!</p>
-          </div>
-        ) : (
-          <button
-            onClick={() => setShowOkConfirm(true)}
-            style={{
-              flexShrink: 0, width: '100%', borderRadius: '18px',
+        {/* ── OK + SOS Buttons ────────────────────────────────────────────── */}
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {okSent ? (
+            <div style={{
+              borderRadius: '20px', padding: '20px', textAlign: 'center',
               background: 'linear-gradient(135deg, #52d68a, #8fe03a)',
-              minHeight: '68px', display: 'flex', flexDirection: 'column',
-              alignItems: 'center', justifyContent: 'center', gap: '1px',
-              boxShadow: '0 6px 24px rgba(82,214,138,0.4)',
-              border: '1.5px solid rgba(255,255,255,0.5)',
+              boxShadow: '0 6px 20px rgba(82,214,138,0.4)',
+            }}>
+              <p style={{ fontSize: '1.2rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>✅ Familie wurde informiert!</p>
+            </div>
+          ) : (
+            <button
+              onClick={() => setShowOkConfirm(true)}
+              style={{
+                width: '100%', borderRadius: '20px',
+                background: 'linear-gradient(135deg, #52d68a, #8fe03a)',
+                minHeight: '88px', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', gap: '2px',
+                boxShadow: '0 6px 24px rgba(82,214,138,0.45)',
+                border: '1.5px solid rgba(255,255,255,0.5)',
+              }}
+            >
+              <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>✅</span>
+              <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#0d2b27' }}>ICH BIN OK</span>
+              <span style={{ fontSize: '0.78rem', color: '#1a4a44', fontWeight: 600 }}>Familie per SMS informieren</span>
+            </button>
+          )}
+          <button
+            onClick={() => onNavigate('emergency')}
+            style={{
+              width: '100%', borderRadius: '20px',
+              background: 'linear-gradient(135deg, #f05a5a, #dc2626)',
+              minHeight: '88px', display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: '2px',
+              boxShadow: '0 6px 24px rgba(220,38,38,0.45)',
+              border: '1.5px solid rgba(255,255,255,0.4)',
             }}
           >
-            <span style={{ fontSize: '1.5rem', lineHeight: 1 }}>✅</span>
-            <span style={{ fontSize: '1.1rem', fontWeight: 900, color: '#0d2b27' }}>Mir geht es gut</span>
-            <span style={{ fontSize: '0.75rem', color: '#1a4a44', fontWeight: 600 }}>Familie per SMS informieren</span>
+            <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>🆘</span>
+            <span style={{ fontSize: '1.2rem', fontWeight: 900, color: '#ffffff' }}>SOS NOTFALL</span>
+            <span style={{ fontSize: '0.78rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600 }}>Notruf & Kontakte informieren</span>
           </button>
-        )}
+        </div>
 
         {/* ── Medikamenten Status ─────────────────────────────────────────── */}
         {medications.length > 0 && (
@@ -247,35 +264,20 @@ export function DashboardScreen({
               </button>
             ))}
           </div>
-          {/* SOS + Ilo row */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-            <button
-              onClick={() => onNavigate('emergency')}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                borderRadius: '20px', padding: '14px 8px',
-                background: 'linear-gradient(135deg, #f05a5a, #dc2626)',
-                boxShadow: '0 6px 20px rgba(220,38,38,0.4)',
-                border: '1.5px solid rgba(255,255,255,0.4)',
-              }}
-            >
-              <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🆘</span>
-              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>SOS</span>
-            </button>
-            <button
-              onClick={() => onNavigate('ilo')}
-              style={{
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                borderRadius: '20px', padding: '14px 8px',
-                background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
-                boxShadow: '0 6px 20px rgba(124,58,237,0.4)',
-                border: '1.5px solid rgba(255,255,255,0.4)',
-              }}
-            >
-              <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🤖</span>
-              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>Ilo KI</span>
-            </button>
-          </div>
+          {/* Ilo KI row */}
+          <button
+            onClick={() => onNavigate('ilo')}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+              borderRadius: '20px', padding: '12px 8px',
+              background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+              boxShadow: '0 6px 20px rgba(124,58,237,0.4)',
+              border: '1.5px solid rgba(255,255,255,0.4)',
+            }}
+          >
+            <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🤖</span>
+            <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>Ilo KI – Sprachassistent</span>
+          </button>
         </div>
 
         {/* ── 4 Sekundär-Buttons ──────────────────────────────────────────── */}

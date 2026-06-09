@@ -19,6 +19,7 @@ interface SettingsScreenProps {
   updateDoctor: (id: string, data: Partial<Doctor>) => void
   deleteDoctor: (id: string) => void
   updateState: (updater: (s: AppState) => AppState) => void
+  onNavigateVoiceSetup: () => void
 }
 
 // ── PIN Screen ──────────────────────────────────────────────────────────────
@@ -175,7 +176,7 @@ function MedForm({ onSave, onCancel }: { onSave: (m: { name: string; photo: stri
 }
 
 // ── Main ────────────────────────────────────────────────────────────────────
-export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, addContact, deleteContact, addMedication, deleteMedication, addDoctor, updateDoctor, deleteDoctor, updateState }: SettingsScreenProps) {
+export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, addContact, deleteContact, addMedication, deleteMedication, addDoctor, updateDoctor, deleteDoctor, updateState, onNavigateVoiceSetup }: SettingsScreenProps) {
   const [showContactForm, setShowContactForm] = useState(false)
   const [showMedForm, setShowMedForm] = useState(false)
   const [showDoctorForm, setShowDoctorForm] = useState(false)
@@ -300,6 +301,27 @@ export function SettingsScreen({ state, onBack, unlockSettings, lockSettings, ad
               style={{ backgroundColor:'#fff', border:'2px solid #7ececa', fontSize:'1.3rem', letterSpacing:'8px', fontWeight:700, color:'#0d2b27', outline:'none' }}
             />
           </div>
+        </section>
+
+        {/* Ilo Stimme */}
+        <section>
+          <SectionTitle title="🎤 Ilo Familien-Stimme" />
+          <button
+            onClick={onNavigateVoiceSetup}
+            className="w-full flex items-center gap-4 rounded-2xl px-4 py-4"
+            style={{ background: state.elevenLabsVoiceId ? 'linear-gradient(135deg, rgba(124,58,237,0.15), rgba(168,85,247,0.15))' : 'rgba(255,255,255,0.88)', border: `2px solid ${state.elevenLabsVoiceId ? '#a855f7' : '#b5e3e3'}` }}
+          >
+            <span style={{ fontSize: '1.8rem' }}>🎤</span>
+            <div className="flex flex-col items-start">
+              <span style={{ fontSize: '1.05rem', fontWeight: 700, color: '#0d2b27' }}>
+                {state.voiceName ? `Stimme: ${state.voiceName}` : 'Familien-Stimme einrichten'}
+              </span>
+              <span style={{ fontSize: '0.85rem', color: state.elevenLabsVoiceId ? '#7c3aed' : '#1a4a44' }}>
+                {state.elevenLabsVoiceId ? '✅ Aktiv – Ilo spricht mit vertrauter Stimme' : 'Ilo mit Familien-Stimme sprechen lassen'}
+              </span>
+            </div>
+            <span style={{ marginLeft: 'auto', fontSize: '1.1rem' }}>›</span>
+          </button>
         </section>
 
         {/* Sturzerkennung */}

@@ -43,6 +43,9 @@ const defaultState: AppState = {
   },
   largeText: false,
   familyCode: '0000',
+  elevenLabsApiKey: '',
+  elevenLabsVoiceId: '',
+  voiceName: '',
 }
 
 function loadState(): AppState {

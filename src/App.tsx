@@ -19,6 +19,7 @@ import { EntertainmentScreen } from './screens/EntertainmentScreen'
 import { IloScreen } from './screens/IloScreen'
 import { HealthRecordScreen } from './screens/HealthRecordScreen'
 import { FamilyScreen } from './screens/FamilyScreen'
+import { VoiceSetupScreen } from './screens/VoiceSetupScreen'
 import { FallAlert } from './components/FallAlert'
 import { CheckInAlert } from './components/CheckInAlert'
 import { NightModeAlert } from './components/NightModeAlert'
@@ -199,6 +200,7 @@ export default function App() {
       updateDoctor={store.updateDoctor}
       deleteDoctor={store.deleteDoctor}
       updateState={store.updateState}
+      onNavigateVoiceSetup={() => setScreen('voice-setup')}
     /></>
   )
 
@@ -237,6 +239,9 @@ export default function App() {
     <>{overlays}<IloScreen
       contacts={store.state.contacts}
       userName={store.state.userName}
+      elevenLabsApiKey={store.state.elevenLabsApiKey}
+      elevenLabsVoiceId={store.state.elevenLabsVoiceId}
+      voiceName={store.state.voiceName}
       onNavigate={navigate}
       onBack={() => setScreen('dashboard')}
       onSOS={() => { handleOkSend(); setScreen('emergency') }}
@@ -254,6 +259,16 @@ export default function App() {
 
   if (screen === 'family') return (
     <>{overlays}<FamilyScreen state={store.state} onBack={() => setScreen('dashboard')} /></>
+  )
+
+  if (screen === 'voice-setup') return (
+    <>{overlays}<VoiceSetupScreen
+      apiKey={store.state.elevenLabsApiKey}
+      voiceId={store.state.elevenLabsVoiceId}
+      voiceName={store.state.voiceName}
+      onSave={(apiKey, voiceId, name) => store.updateState(s => ({ ...s, elevenLabsApiKey: apiKey, elevenLabsVoiceId: voiceId, voiceName: name }))}
+      onBack={() => setScreen('settings')}
+    /></>
   )
 
   if (screen === 'location') return (

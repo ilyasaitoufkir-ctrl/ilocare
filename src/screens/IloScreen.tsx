@@ -5,6 +5,9 @@ import type { Contact, Screen } from '../types'
 interface IloScreenProps {
   contacts: Contact[]
   userName: string
+  elevenLabsApiKey: string
+  elevenLabsVoiceId: string
+  voiceName: string
   onNavigate: (screen: Screen) => void
   onBack: () => void
   onSOS: () => void
@@ -60,7 +63,7 @@ function speak(text: string) {
   window.speechSynthesis.speak(utt)
 }
 
-export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: IloScreenProps) {
+export function IloScreen({ contacts, userName, elevenLabsApiKey, elevenLabsVoiceId, voiceName, onNavigate, onBack, onSOS }: IloScreenProps) {
   const [mode, setMode] = useState<IloMode>('idle')
   const [transcript, setTranscript] = useState('')
   const [response, setResponse] = useState('')
@@ -71,6 +74,35 @@ export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: Ilo
   const [doctorPhone, setDoctorPhone] = useState('')
   const recRef = useRef<WebkitRec>(null)
   const chatEndRef = useRef<HTMLDivElement>(null)
+
+  async function speakWithVoice(text: string) {
+    if (elevenLabsVoiceId && elevenLabsApiKey) {
+      try {
+        const res = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${elevenLabsVoiceId}`, {
+          method: 'POST',
+          headers: {
+            'Accept': 'audio/mpeg',
+            'Content-Type': 'application/json',
+            'xi-api-key': elevenLabsApiKey,
+          },
+          body: JSON.stringify({
+            text,
+            model_id: 'eleven_multilingual_v2',
+            voice_settings: { stability: 0.5, similarity_boost: 0.75 },
+          }),
+        })
+        if (res.ok) {
+          const blob = await res.blob()
+          const url = URL.createObjectURL(blob)
+          const audio = new Audio(url)
+          audio.onended = () => URL.revokeObjectURL(url)
+          audio.play()
+          return
+        }
+      } catch { /* fall through to browser TTS */ }
+    }
+    speak(text)
+  }
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -131,15 +163,15 @@ export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: Ilo
         parameter.toLowerCase().includes(c.name.toLowerCase().split(' ')[0])
       )
       if (contact?.phone) {
-        speak(antwort)
+        speakWithVoice(antwort)
         setTimeout(() => { window.location.href = `tel:${contact.phone}` }, 1500)
       } else {
-        speak(`Ich konnte ${parameter} nicht in deinen Kontakten finden.`)
+        speakWithVoice(`Ich konnte ${parameter} nicht in deinen Kontakten finden.`)
         setResponse(`Kontakt "${parameter}" nicht gefunden.`)
       }
       return
     }
-    speak(antwort)
+    speakWithVoice(antwort)
     const navMap: Record<string, Screen> = {
       MEDIKAMENTE: 'medications',
       RADIO: 'radio',
@@ -155,7 +187,7 @@ export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: Ilo
       setMode('health-chat')
       const greeting = antwort || 'Wie kann ich dir gesundheitlich helfen?'
       setHealthMessages([{ role: 'assistant', content: greeting }])
-      speak(greeting)
+      speakWithVoice(greeting)
     }
   }
 
@@ -184,7 +216,7 @@ export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: Ilo
       } catch {
         const msg = 'Entschuldigung, ich hatte ein Problem. Bitte versuche es nochmal.'
         setResponse(msg)
-        speak(msg)
+        speakWithVoice(msg)
       } finally {
         setMode('idle')
       }
@@ -216,7 +248,7 @@ export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: Ilo
       const assistantMsg: HealthMessage = { role: 'assistant', content: clean, showDoctorBtn: needsDoctor }
       setHealthMessages(prev => [...prev, assistantMsg])
       if (needsDoctor) setShowDoctorBtn(true)
-      speak(clean)
+      speakWithVoice(clean)
     } catch {
       const err: HealthMessage = { role: 'assistant', content: 'Entschuldigung, ich konnte nicht antworten.' }
       setHealthMessages(prev => [...prev, err])
@@ -318,6 +350,11 @@ export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: Ilo
             🤖
           </div>
           <p style={{ fontSize: '1.3rem', fontWeight: 900, color: '#0d2b27', margin: 0 }}>Hallo, {userName}!</p>
+          {voiceName && elevenLabsVoiceId && (
+            <div style={{ borderRadius: '12px', padding: '4px 12px', background: 'linear-gradient(135deg, rgba(124,58,237,0.2), rgba(168,85,247,0.2))', border: '1px solid rgba(124,58,237,0.35)' }}>
+              <p style={{ fontSize: '0.8rem', fontWeight: 700, color: '#7c3aed', margin: 0 }}>🎤 Stimme von {voiceName}</p>
+            </div>
+          )}
           <p style={{ fontSize: '1rem', color: '#1a4a44', margin: 0, fontWeight: 600 }}>
             {mode === 'idle' && 'Was kann ich für dich tun?'}
             {mode === 'listening' && '🎤 Ich höre zu…'}
@@ -377,7 +414,7 @@ export function IloScreen({ contacts, userName, onNavigate, onBack, onSOS }: Ilo
           {[
             { label: '💊 Medis', action: () => onNavigate('medications') },
             { label: '📰 News', action: () => onNavigate('news') },
-            { label: '🏥 Gesundheit', action: () => { setMode('health-chat'); setHealthMessages([{ role: 'assistant', content: `Hallo ${userName}! Wie fühlst du dich? Was beschäftigt dich?` }]); speak(`Hallo ${userName}! Wie fühlst du dich?`) } },
+            { label: '🏥 Gesundheit', action: () => { setMode('health-chat'); setHealthMessages([{ role: 'assistant', content: `Hallo ${userName}! Wie fühlst du dich? Was beschäftigt dich?` }]); speakWithVoice(`Hallo ${userName}! Wie fühlst du dich?`) } },
           ].map(btn => (
             <button
               key={btn.label}

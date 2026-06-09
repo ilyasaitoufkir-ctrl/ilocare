@@ -15,6 +15,7 @@ export type Screen =
   | 'ilo'
   | 'health-record'
   | 'family'
+  | 'voice-setup'
 
 // ── Contacts ────────────────────────────────────────────────────────────────
 export interface Contact {
@@ -137,6 +138,9 @@ export interface AppState {
   healthRecord: HealthRecord
   largeText: boolean
   familyCode: string
+  elevenLabsApiKey: string
+  elevenLabsVoiceId: string
+  voiceName: string
 }
 
 // ── API response types ───────────────────────────────────────────────────────

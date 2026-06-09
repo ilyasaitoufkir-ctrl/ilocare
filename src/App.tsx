@@ -20,6 +20,7 @@ import { IloScreen } from './screens/IloScreen'
 import { HealthRecordScreen } from './screens/HealthRecordScreen'
 import { FamilyScreen } from './screens/FamilyScreen'
 import { VoiceSetupScreen } from './screens/VoiceSetupScreen'
+import { PainTrackerScreen } from './screens/PainTrackerScreen'
 import { FallAlert } from './components/FallAlert'
 import { CheckInAlert } from './components/CheckInAlert'
 import { NightModeAlert } from './components/NightModeAlert'
@@ -266,6 +267,16 @@ export default function App() {
       voiceName={store.state.voiceName}
       onSave={(apiKey, voiceId, name) => store.updateState(s => ({ ...s, elevenLabsApiKey: apiKey, elevenLabsVoiceId: voiceId, voiceName: name }))}
       onBack={() => setScreen('settings')}
+    /></>
+  )
+
+  if (screen === 'pain-tracker') return (
+    <>{overlays}<PainTrackerScreen
+      painHistory={store.state.painHistory}
+      contacts={store.state.contacts}
+      userName={store.state.userName}
+      onAddEntry={store.addPainEntry}
+      onBack={() => setScreen('dashboard')}
     /></>
   )
 

@@ -264,6 +264,25 @@ export function DashboardScreen({
               </button>
             ))}
           </div>
+          {/* Pain Tracker */}
+          <button
+            onClick={() => onNavigate('pain-tracker')}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+              borderRadius: '20px', padding: '12px 8px',
+              background: 'linear-gradient(135deg, #f97316, #ef4444)',
+              boxShadow: '0 6px 20px rgba(249,115,22,0.4)',
+              border: '1.5px solid rgba(255,255,255,0.4)',
+              minHeight: '68px',
+            }}
+          >
+            <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🩺</span>
+            <div style={{ textAlign: 'left' }}>
+              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)', display: 'block' }}>Schmerzen melden</span>
+              <span style={{ fontSize: '0.72rem', color: 'rgba(255,255,255,0.85)', fontWeight: 600, display: 'block' }}>Körperkarte & Familie informieren</span>
+            </div>
+          </button>
+
           {/* Ilo KI row */}
           <button
             onClick={() => onNavigate('ilo')}

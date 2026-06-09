@@ -16,6 +16,7 @@ export type Screen =
   | 'health-record'
   | 'family'
   | 'voice-setup'
+  | 'pain-tracker'
 
 // ── Contacts ────────────────────────────────────────────────────────────────
 export interface Contact {
@@ -118,6 +119,15 @@ export interface HealthRecord {
   notes: string
 }
 
+// ── Pain Tracker ─────────────────────────────────────────────────────────────
+export interface PainEntry {
+  id: string
+  timestamp: string
+  bodyParts: string[]
+  severity: number
+  note: string
+}
+
 // ── App State ─────────────────────────────────────────────────────────────────
 export interface AppState {
   contacts: Contact[]
@@ -141,6 +151,7 @@ export interface AppState {
   elevenLabsApiKey: string
   elevenLabsVoiceId: string
   voiceName: string
+  painHistory: PainEntry[]
 }
 
 // ── API response types ───────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type {
   AppState, Contact, Medication, MedicationDose,
-  Doctor, ShoppingItem, SavedLocation, HealthRecord
+  Doctor, ShoppingItem, SavedLocation, HealthRecord, PainEntry
 } from '../types'
 
 const STORAGE_KEY = 'ilocare_v3'
@@ -46,6 +46,7 @@ const defaultState: AppState = {
   elevenLabsApiKey: '',
   elevenLabsVoiceId: '',
   voiceName: '',
+  painHistory: [],
 }
 
 function loadState(): AppState {
@@ -62,6 +63,7 @@ function loadState(): AppState {
       geofence: { ...defaultState.geofence, ...parsed.geofence },
       nightMode: { ...defaultState.nightMode, ...parsed.nightMode },
       healthRecord: { ...defaultState.healthRecord, ...parsed.healthRecord },
+      painHistory: parsed.painHistory || [],
       settingsUnlocked: false,
     }
   } catch {
@@ -177,6 +179,18 @@ export function useStore() {
     updateState(s => ({ ...s, shoppingList: s.shoppingList.filter(i => !i.done) }))
   }, [updateState])
 
+  // ── Pain Tracker ──────────────────────────────────────────────────────────
+  const addPainEntry = useCallback((entry: { bodyParts: string[]; severity: number; note: string }) => {
+    const newEntry: PainEntry = {
+      id: Date.now().toString(),
+      timestamp: new Date().toISOString(),
+      bodyParts: entry.bodyParts,
+      severity: entry.severity,
+      note: entry.note,
+    }
+    updateState(s => ({ ...s, painHistory: [newEntry, ...s.painHistory].slice(0, 90) }))
+  }, [updateState])
+
   // ── Location ──────────────────────────────────────────────────────────────
   const updateLastLocation = useCallback((loc: SavedLocation) => {
     updateState(s => ({ ...s, lastKnownLocation: loc }))
@@ -201,6 +215,7 @@ export function useStore() {
     addMedication, updateMedication, deleteMedication, markDoseTaken, resetDailyDoses,
     addDoctor, updateDoctor, deleteDoctor,
     addShoppingItem, toggleShoppingItem, deleteShoppingItem, clearDoneItems,
+    addPainEntry,
     updateLastLocation,
     unlockSettings, lockSettings,
   }

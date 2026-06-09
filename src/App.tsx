@@ -15,6 +15,10 @@ import { DoctorsScreen } from './screens/DoctorsScreen'
 import { LocationScreen } from './screens/LocationScreen'
 import { NewsScreen } from './screens/NewsScreen'
 import { RadioScreen } from './screens/RadioScreen'
+import { EntertainmentScreen } from './screens/EntertainmentScreen'
+import { IloScreen } from './screens/IloScreen'
+import { HealthRecordScreen } from './screens/HealthRecordScreen'
+import { FamilyScreen } from './screens/FamilyScreen'
 import { FallAlert } from './components/FallAlert'
 import { CheckInAlert } from './components/CheckInAlert'
 import { NightModeAlert } from './components/NightModeAlert'
@@ -43,6 +47,12 @@ export default function App() {
   const [nightAlertShown, setNightAlertShown] = useState(false)
   const [fallDetectionEnabled, setFallDetectionEnabled] = useState(false)
   const store = useStore()
+
+  // ── Large text zoom ───────────────────────────────────────────────────────
+  useEffect(() => {
+    const root = document.getElementById('root')
+    if (root) (root.style as CSSStyleDeclaration & { zoom: string }).zoom = store.state.largeText ? '1.2' : '1'
+  }, [store.state.largeText])
 
   // ── Daily medication reset ────────────────────────────────────────────────
   useEffect(() => {
@@ -218,6 +228,33 @@ export default function App() {
   if (screen === 'news') return <>{overlays}<NewsScreen onBack={() => setScreen('dashboard')} /></>
 
   if (screen === 'radio') return <>{overlays}<RadioScreen onBack={() => setScreen('dashboard')} /></>
+
+  if (screen === 'entertainment') return (
+    <>{overlays}<EntertainmentScreen onNavigate={navigate} onBack={() => setScreen('dashboard')} /></>
+  )
+
+  if (screen === 'ilo') return (
+    <>{overlays}<IloScreen
+      contacts={store.state.contacts}
+      userName={store.state.userName}
+      onNavigate={navigate}
+      onBack={() => setScreen('dashboard')}
+      onSOS={() => { handleOkSend(); setScreen('emergency') }}
+    /></>
+  )
+
+  if (screen === 'health-record') return (
+    <>{overlays}<HealthRecordScreen
+      record={store.state.healthRecord}
+      userName={store.state.userName}
+      onSave={r => store.updateState(s => ({ ...s, healthRecord: r }))}
+      onBack={() => setScreen('dashboard')}
+    /></>
+  )
+
+  if (screen === 'family') return (
+    <>{overlays}<FamilyScreen state={store.state} onBack={() => setScreen('dashboard')} /></>
+  )
 
   if (screen === 'location') return (
     <>{overlays}<LocationScreen

@@ -11,6 +11,10 @@ export type Screen =
   | 'location'
   | 'news'
   | 'radio'
+  | 'entertainment'
+  | 'ilo'
+  | 'health-record'
+  | 'family'
 
 // ── Contacts ────────────────────────────────────────────────────────────────
 export interface Contact {
@@ -99,6 +103,20 @@ export interface ReminderSettings {
   checkIn: CheckInSettings
 }
 
+// ── Health Record ────────────────────────────────────────────────────────────
+export interface HealthRecord {
+  bloodType: string
+  allergies: string
+  conditions: string
+  currentMedications: string
+  doctorName: string
+  doctorPhone: string
+  insuranceName: string
+  insuranceNumber: string
+  emergencyContact: string
+  notes: string
+}
+
 // ── App State ─────────────────────────────────────────────────────────────────
 export interface AppState {
   contacts: Contact[]
@@ -116,6 +134,9 @@ export interface AppState {
   lastKnownLocation: SavedLocation | null
   picnicEmail: string
   picnicPassword: string
+  healthRecord: HealthRecord
+  largeText: boolean
+  familyCode: string
 }
 
 // ── API response types ───────────────────────────────────────────────────────

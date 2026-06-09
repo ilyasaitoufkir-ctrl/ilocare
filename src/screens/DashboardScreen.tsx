@@ -45,16 +45,16 @@ function getCountdown(timeStr: string): string {
 }
 
 const MAIN_BUTTONS: { screen: Screen; emoji: string; label: string; grad: string; shadow: string }[] = [
-  { screen: 'contacts',    emoji: '👥',  label: 'Kontakte',    grad: 'linear-gradient(135deg, #2a9d8f, #7ececa)', shadow: 'rgba(42,157,143,0.35)' },
-  { screen: 'medications', emoji: '💊',  label: 'Medikamente', grad: 'linear-gradient(135deg, #7ececa, #2a9d8f)', shadow: 'rgba(126,206,202,0.35)' },
-  { screen: 'news',        emoji: '📰',  label: 'Nachrichten', grad: 'linear-gradient(135deg, #003399, #0066cc)', shadow: 'rgba(0,51,153,0.35)'   },
-  { screen: 'radio',       emoji: '📻',  label: 'Radio',       grad: 'linear-gradient(135deg, #52d68a, #a8edbb)', shadow: 'rgba(82,214,138,0.35)' },
+  { screen: 'contacts',      emoji: '👥', label: 'Kontakte',    grad: 'linear-gradient(135deg, #2a9d8f, #7ececa)', shadow: 'rgba(42,157,143,0.35)' },
+  { screen: 'medications',   emoji: '💊', label: 'Medikamente', grad: 'linear-gradient(135deg, #7ececa, #2a9d8f)', shadow: 'rgba(126,206,202,0.35)' },
+  { screen: 'entertainment', emoji: '🎭', label: 'Unterhaltung', grad: 'linear-gradient(135deg, #52d68a, #a8edbb)', shadow: 'rgba(82,214,138,0.35)' },
+  { screen: 'health-record', emoji: '🏥', label: 'Gesundheit',  grad: 'linear-gradient(135deg, #003399, #0066cc)', shadow: 'rgba(0,51,153,0.35)'  },
 ]
 
 const SECONDARY_BUTTONS: { screen: Screen; emoji: string; label: string; grad: string }[] = [
   { screen: 'insurance', emoji: '💳', label: 'Krankenkasse', grad: 'linear-gradient(135deg, #8fe03a, #a8edbb)' },
   { screen: 'shopping',  emoji: '🛒', label: 'Einkaufen',    grad: 'linear-gradient(135deg, #52d68a, #7ececa)' },
-  { screen: 'messages',  emoji: '💬', label: 'Nachrichten',  grad: 'linear-gradient(135deg, #2a9d8f, #52d68a)' },
+  { screen: 'family',    emoji: '👨‍👩‍👧', label: 'Familie',     grad: 'linear-gradient(135deg, #2a9d8f, #52d68a)' },
   { screen: 'location',  emoji: '📍', label: 'Standort',     grad: 'linear-gradient(135deg, #7ececa, #8fe03a)' },
 ]
 
@@ -233,21 +233,35 @@ export function DashboardScreen({
               </button>
             ))}
           </div>
-          <button
-            onClick={() => onNavigate('emergency')}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
-              borderRadius: '20px', padding: '16px 8px',
-              background: 'linear-gradient(135deg, #f05a5a, #dc2626)',
-              boxShadow: '0 6px 20px rgba(220,38,38,0.4)',
-              border: '1.5px solid rgba(255,255,255,0.4)',
-            }}
-          >
-            <span style={{ fontSize: '2rem', lineHeight: 1 }}>🆘</span>
-            <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>
-              SOS Notfall
-            </span>
-          </button>
+          {/* SOS + Ilo row */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <button
+              onClick={() => onNavigate('emergency')}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                borderRadius: '20px', padding: '14px 8px',
+                background: 'linear-gradient(135deg, #f05a5a, #dc2626)',
+                boxShadow: '0 6px 20px rgba(220,38,38,0.4)',
+                border: '1.5px solid rgba(255,255,255,0.4)',
+              }}
+            >
+              <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🆘</span>
+              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>SOS</span>
+            </button>
+            <button
+              onClick={() => onNavigate('ilo')}
+              style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                borderRadius: '20px', padding: '14px 8px',
+                background: 'linear-gradient(135deg, #7c3aed, #a855f7)',
+                boxShadow: '0 6px 20px rgba(124,58,237,0.4)',
+                border: '1.5px solid rgba(255,255,255,0.4)',
+              }}
+            >
+              <span style={{ fontSize: '1.6rem', lineHeight: 1 }}>🤖</span>
+              <span style={{ fontSize: '1rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>Ilo KI</span>
+            </button>
+          </div>
         </div>
 
         {/* ── 4 Sekundär-Buttons ──────────────────────────────────────────── */}

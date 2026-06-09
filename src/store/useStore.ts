@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import type {
   AppState, Contact, Medication, MedicationDose,
-  Doctor, ShoppingItem, SavedLocation
+  Doctor, ShoppingItem, SavedLocation, HealthRecord
 } from '../types'
 
 const STORAGE_KEY = 'ilocare_v3'
@@ -36,6 +36,13 @@ const defaultState: AppState = {
   lastKnownLocation: null,
   picnicEmail: '',
   picnicPassword: '',
+  healthRecord: {
+    bloodType: '', allergies: '', conditions: '', currentMedications: '',
+    doctorName: '', doctorPhone: '', insuranceName: '', insuranceNumber: '',
+    emergencyContact: '', notes: '',
+  },
+  largeText: false,
+  familyCode: '0000',
 }
 
 function loadState(): AppState {
@@ -51,6 +58,7 @@ function loadState(): AppState {
       insuranceCard: { ...defaultState.insuranceCard, ...parsed.insuranceCard },
       geofence: { ...defaultState.geofence, ...parsed.geofence },
       nightMode: { ...defaultState.nightMode, ...parsed.nightMode },
+      healthRecord: { ...defaultState.healthRecord, ...parsed.healthRecord },
       settingsUnlocked: false,
     }
   } catch {

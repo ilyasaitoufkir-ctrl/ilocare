@@ -8,13 +8,13 @@ interface NewsScreenProps {
 }
 
 const CATEGORIES = [
-  { label: '📰 Alle',       feed: 'https://www.tagesschau.de/xml/rss2/' },
-  { label: '🏛️ Politik',    feed: 'https://www.tagesschau.de/xml/rss2_thema/inland/' },
-  { label: '🌍 Ausland',    feed: 'https://www.tagesschau.de/xml/rss2_thema/ausland/' },
-  { label: '⚽ Sport',      feed: 'https://www.tagesschau.de/xml/rss2_thema/sport/' },
-  { label: '💰 Wirtschaft', feed: 'https://www.tagesschau.de/xml/rss2_thema/wirtschaft/' },
-  { label: '🔬 Wissen',     feed: 'https://www.tagesschau.de/xml/rss2_thema/wissen/' },
-  { label: '🎭 Kultur',     feed: 'https://www.tagesschau.de/xml/rss2_thema/kultur/' },
+  { label: '📰 Alle',       key: 'alle' },
+  { label: '🏛️ Politik',    key: 'inland' },
+  { label: '🌍 Ausland',    key: 'ausland' },
+  { label: '⚽ Sport',      key: 'sport' },
+  { label: '💰 Wirtschaft', key: 'wirtschaft' },
+  { label: '🔬 Wissen',     key: 'wissen' },
+  { label: '🎭 Kultur',     key: 'kultur' },
 ]
 
 function formatDate(pubDate: string): string {
@@ -29,8 +29,8 @@ function formatDate(pubDate: string): string {
 }
 
 export function NewsScreen({ onBack }: NewsScreenProps) {
-  const [activeFeed, setActiveFeed] = useState(CATEGORIES[0].feed)
-  const { items, loading, error } = useNews(activeFeed)
+  const [activeKategorie, setActiveKategorie] = useState(CATEGORIES[0].key)
+  const { items, loading, error } = useNews(activeKategorie)
 
   return (
     <div className="screen">
@@ -45,7 +45,7 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <div style={{
-                backgroundColor: '#cc0000',
+                backgroundColor: '#003399',
                 borderRadius: '8px',
                 padding: '5px 12px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -72,11 +72,11 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
             scrollbarWidth: 'none',
           }}>
             {CATEGORIES.map(cat => {
-              const active = cat.feed === activeFeed
+              const active = cat.key === activeKategorie
               return (
                 <button
-                  key={cat.feed}
-                  onClick={() => setActiveFeed(cat.feed)}
+                  key={cat.key}
+                  onClick={() => setActiveKategorie(cat.key)}
                   style={{
                     flexShrink: 0,
                     borderRadius: '20px',
@@ -124,7 +124,7 @@ export function NewsScreen({ onBack }: NewsScreenProps) {
           {/* Artikel */}
           {items.map((item, i) => (
             <a
-              key={`${activeFeed}-${i}`}
+              key={`${activeKategorie}-${i}`}
               href={item.link}
               target="_blank"
               rel="noopener noreferrer"

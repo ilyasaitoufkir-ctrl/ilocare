@@ -45,10 +45,10 @@ function getCountdown(timeStr: string): string {
 }
 
 const MAIN_BUTTONS: { screen: Screen; emoji: string; label: string; grad: string; shadow: string }[] = [
-  { screen: 'contacts',    emoji: '👥',  label: 'Kontakte',       grad: 'linear-gradient(135deg, #2a9d8f, #7ececa)', shadow: 'rgba(42,157,143,0.35)' },
-  { screen: 'doctors',     emoji: '👨‍⚕️', label: 'Arzt & Notfall', grad: 'linear-gradient(135deg, #52d68a, #a8edbb)', shadow: 'rgba(82,214,138,0.35)' },
-  { screen: 'medications', emoji: '💊',  label: 'Medikamente',    grad: 'linear-gradient(135deg, #7ececa, #2a9d8f)', shadow: 'rgba(126,206,202,0.35)' },
-  { screen: 'emergency',   emoji: '🆘',  label: 'SOS Notruf',     grad: 'linear-gradient(135deg, #f05a5a, #dc2626)', shadow: 'rgba(220,38,38,0.35)' },
+  { screen: 'contacts',    emoji: '👥',  label: 'Kontakte',    grad: 'linear-gradient(135deg, #2a9d8f, #7ececa)', shadow: 'rgba(42,157,143,0.35)' },
+  { screen: 'medications', emoji: '💊',  label: 'Medikamente', grad: 'linear-gradient(135deg, #7ececa, #2a9d8f)', shadow: 'rgba(126,206,202,0.35)' },
+  { screen: 'news',        emoji: '📰',  label: 'Nachrichten', grad: 'linear-gradient(135deg, #003399, #0066cc)', shadow: 'rgba(0,51,153,0.35)'   },
+  { screen: 'radio',       emoji: '📻',  label: 'Radio',       grad: 'linear-gradient(135deg, #52d68a, #a8edbb)', shadow: 'rgba(82,214,138,0.35)' },
 ]
 
 const SECONDARY_BUTTONS: { screen: Screen; emoji: string; label: string; grad: string }[] = [
@@ -211,26 +211,43 @@ export function DashboardScreen({
           </button>
         )}
 
-        {/* ── 4 Haupt-Buttons ─────────────────────────────────────────────── */}
-        <div style={{ flexShrink: 0, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          {MAIN_BUTTONS.map(btn => (
-            <button
-              key={btn.screen}
-              onClick={() => onNavigate(btn.screen)}
-              style={{
-                display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                borderRadius: '20px', padding: '12px 8px', gap: '5px',
-                background: btn.grad, minHeight: '84px',
-                boxShadow: `0 6px 20px ${btn.shadow}`,
-                border: '1.5px solid rgba(255,255,255,0.4)',
-              }}
-            >
-              <span style={{ fontSize: '2rem', lineHeight: 1 }}>{btn.emoji}</span>
-              <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#ffffff', textAlign: 'center', textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
-                {btn.label}
-              </span>
-            </button>
-          ))}
+        {/* ── 5 Haupt-Buttons (2+2+1) ─────────────────────────────────────── */}
+        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            {MAIN_BUTTONS.map(btn => (
+              <button
+                key={btn.screen}
+                onClick={() => onNavigate(btn.screen)}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: '20px', padding: '12px 8px', gap: '5px',
+                  background: btn.grad, minHeight: '84px',
+                  boxShadow: `0 6px 20px ${btn.shadow}`,
+                  border: '1.5px solid rgba(255,255,255,0.4)',
+                }}
+              >
+                <span style={{ fontSize: '2rem', lineHeight: 1 }}>{btn.emoji}</span>
+                <span style={{ fontSize: '0.88rem', fontWeight: 800, color: '#ffffff', textAlign: 'center', textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
+                  {btn.label}
+                </span>
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => onNavigate('emergency')}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+              borderRadius: '20px', padding: '16px 8px',
+              background: 'linear-gradient(135deg, #f05a5a, #dc2626)',
+              boxShadow: '0 6px 20px rgba(220,38,38,0.4)',
+              border: '1.5px solid rgba(255,255,255,0.4)',
+            }}
+          >
+            <span style={{ fontSize: '2rem', lineHeight: 1 }}>🆘</span>
+            <span style={{ fontSize: '1.05rem', fontWeight: 900, color: '#ffffff', textShadow: '0 1px 4px rgba(0,0,0,0.2)' }}>
+              SOS Notfall
+            </span>
+          </button>
         </div>
 
         {/* ── 4 Sekundär-Buttons ──────────────────────────────────────────── */}
@@ -256,26 +273,6 @@ export function DashboardScreen({
             </button>
           ))}
         </div>
-
-        {/* ── Radio Button ────────────────────────────────────────────────── */}
-        <button
-          onClick={() => onNavigate('radio')}
-          style={{
-            flexShrink: 0, width: '100%', borderRadius: '18px',
-            padding: '12px 18px', display: 'flex', alignItems: 'center', gap: '14px',
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75))',
-            backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-            border: '1.5px solid rgba(255,255,255,0.65)',
-            boxShadow: '0 3px 14px rgba(42,157,143,0.12)',
-          }}
-        >
-          <span style={{ fontSize: '1.8rem', lineHeight: 1 }}>📻</span>
-          <div style={{ flex: 1, textAlign: 'left' }}>
-            <p style={{ fontSize: '0.95rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>Radio</p>
-            <p style={{ fontSize: '0.75rem', color: '#1a4a44', margin: 0, fontWeight: 600 }}>Antenne Bayern · NDR 2 · SWR3…</p>
-          </div>
-          <span style={{ fontSize: '1.2rem' }}>▶️</span>
-        </button>
 
         {/* ── Nachrichten (2 Schlagzeilen) ────────────────────────────────── */}
         <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>

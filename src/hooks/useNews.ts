@@ -3,11 +3,7 @@ import type { NewsItem } from '../types'
 
 const CACHE_TTL = 15 * 60 * 1000
 
-function cacheKey(feedUrl: string) {
-  return `ilocare_news_${feedUrl}`
-}
-
-export function useNews(feedUrl = 'https://www.tagesschau.de/xml/rss2/') {
+export function useNews(kategorie = 'alle') {
   const [items, setItems] = useState<NewsItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -15,8 +11,9 @@ export function useNews(feedUrl = 'https://www.tagesschau.de/xml/rss2/') {
   useEffect(() => {
     setLoading(true)
     setError(null)
+    setItems([])
 
-    const key = cacheKey(feedUrl)
+    const key = `ilocare_news_${kategorie}`
     const cached = sessionStorage.getItem(key)
     if (cached) {
       try {
@@ -29,7 +26,7 @@ export function useNews(feedUrl = 'https://www.tagesschau.de/xml/rss2/') {
       } catch { /* ignore */ }
     }
 
-    fetch(`/api/news?feed=${encodeURIComponent(feedUrl)}`)
+    fetch(`/api/news?kategorie=${encodeURIComponent(kategorie)}`)
       .then(r => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`)
         return r.text()
@@ -51,7 +48,7 @@ export function useNews(feedUrl = 'https://www.tagesschau.de/xml/rss2/') {
       })
       .catch(() => setError('Nachrichten nicht verfügbar'))
       .finally(() => setLoading(false))
-  }, [feedUrl])
+  }, [kategorie])
 
   return { items, loading, error }
 }

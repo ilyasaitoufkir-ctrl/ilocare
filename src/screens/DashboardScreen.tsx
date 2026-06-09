@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useClock } from '../hooks/useClock'
 import { useWeather } from '../hooks/useWeather'
-import { useNews } from '../hooks/useNews'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import type { Medication, Screen, Contact } from '../types'
 
@@ -65,7 +64,6 @@ export function DashboardScreen({
 }: DashboardScreenProps) {
   const { time, dayName, date, greeting } = useClock()
   const { data: weather } = useWeather(weatherCity)
-  const { items: news } = useNews()
   const [showOkConfirm, setShowOkConfirm] = useState(false)
   const [okSent, setOkSent] = useState(false)
 
@@ -91,12 +89,28 @@ export function DashboardScreen({
 
       {/* ── Gradient Header ──────────────────────────────────────────────── */}
       <div style={{
-        flexShrink: 0,
+        flexShrink: 0, position: 'relative',
         background: 'linear-gradient(135deg, #1a7a6e 0%, #2a9d8f 50%, #3db88a 100%)',
         padding: '10px 18px 12px',
         boxShadow: '0 4px 24px rgba(26,122,110,0.4)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
       }}>
+        {/* Settings gear — always visible top-right */}
+        <button
+          onClick={() => onNavigate('settings')}
+          style={{
+            position: 'absolute', top: '10px', right: '12px',
+            width: '48px', height: '48px', borderRadius: '14px',
+            backgroundColor: 'rgba(255,255,255,0.22)',
+            border: '1.5px solid rgba(255,255,255,0.4)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontSize: '1.5rem',
+          }}
+          aria-label="Einstellungen"
+        >
+          ⚙️
+        </button>
+
         <p style={{ fontSize: '0.72rem', fontWeight: 700, color: 'rgba(255,255,255,0.75)', margin: 0, letterSpacing: '4px', textTransform: 'uppercase' }}>
           ✦ ilocare ✦
         </p>
@@ -288,44 +302,6 @@ export function DashboardScreen({
           ))}
         </div>
 
-        {/* ── Nachrichten (2 Schlagzeilen) ────────────────────────────────── */}
-        <div style={{ flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '5px' }}>
-          <button onClick={() => onNavigate('news')} style={{ background: 'none', border: 'none', padding: 0, textAlign: 'left', marginBottom: '2px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <p style={{ fontSize: '0.78rem', fontWeight: 800, color: 'rgba(255,255,255,0.85)', margin: 0, letterSpacing: '1px', textTransform: 'uppercase' }}>
-              📰 Nachrichten
-            </p>
-            <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.65)', fontWeight: 600 }}>alle anzeigen →</span>
-          </button>
-          {news.slice(0, 2).map((item, i) => (
-            <button key={i} onClick={() => onNavigate('news')}
-              style={{
-                display: 'block', borderRadius: '14px', padding: '9px 13px', width: '100%', textAlign: 'left',
-                background: 'rgba(255,255,255,0.82)',
-                backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-                border: '1.5px solid rgba(255,255,255,0.6)',
-                boxShadow: '0 2px 12px rgba(42,157,143,0.08)',
-              }}>
-              <p style={{ fontSize: '0.86rem', fontWeight: 700, color: '#0d2b27', margin: 0, lineHeight: 1.3 }}>{item.title}</p>
-            </button>
-          ))}
-        </div>
-
-        {/* ── Einstellungen ───────────────────────────────────────────────── */}
-        <button
-          onClick={() => onNavigate('settings')}
-          style={{
-            flexShrink: 0, width: '100%', borderRadius: '14px',
-            padding: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            background: 'rgba(255,255,255,0.75)',
-            backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-            border: '1.5px solid rgba(255,255,255,0.55)',
-            boxShadow: '0 2px 10px rgba(42,157,143,0.08)',
-            marginTop: 'auto',
-          }}
-        >
-          <span style={{ fontSize: '1rem' }}>⚙️</span>
-          <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1a4a44' }}>Einstellungen</span>
-        </button>
       </div>
     </div>
   )

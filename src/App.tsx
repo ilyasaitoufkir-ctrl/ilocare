@@ -3,6 +3,9 @@ import { useStore } from './store/useStore'
 import { useFallDetection } from './hooks/useFallDetection'
 import { useGeofencing } from './hooks/useGeofencing'
 import { useCheckIn } from './hooks/useCheckIn'
+import { useFirebaseSync } from './hooks/useFirebaseSync'
+import { WelcomeScreen } from './screens/WelcomeScreen'
+import { FamilyDashboardScreen } from './screens/FamilyDashboardScreen'
 import { DashboardScreen } from './screens/DashboardScreen'
 import { ContactsScreen } from './screens/ContactsScreen'
 import { MessagesScreen } from './screens/MessagesScreen'
@@ -24,7 +27,7 @@ import { PainTrackerScreen } from './screens/PainTrackerScreen'
 import { FallAlert } from './components/FallAlert'
 import { CheckInAlert } from './components/CheckInAlert'
 import { NightModeAlert } from './components/NightModeAlert'
-import type { Screen, SavedLocation } from './types'
+import type { Screen, SavedLocation, AppMode } from './types'
 
 function isNightTime(startTime: string, endTime: string): boolean {
   const now = new Date()
@@ -44,11 +47,18 @@ function getCurrentTime() {
 }
 
 export default function App() {
+  const [appMode, setAppMode] = useState<AppMode>(() => {
+    const saved = localStorage.getItem('ilocare_mode')
+    if (saved === 'senior' || saved === 'family') return saved
+    return 'welcome'
+  })
   const [screen, setScreen] = useState<Screen>('dashboard')
   const [msgContactId, setMsgContactId] = useState<string | null>(null)
   const [nightAlertShown, setNightAlertShown] = useState(false)
   const [fallDetectionEnabled, setFallDetectionEnabled] = useState(false)
   const store = useStore()
+
+  useFirebaseSync(store.state, appMode === 'senior')
 
   // ── Large text zoom ───────────────────────────────────────────────────────
   useEffect(() => {
@@ -159,9 +169,14 @@ export default function App() {
   // ── OK Button handler ─────────────────────────────────────────────────────
   function handleOkSend() {
     const phones = store.state.contacts.map(c => c.phone).filter(Boolean).join(',')
-    const msg = `✅ ${store.state.userName} geht es gut – ${getCurrentTime()} Uhr`
+    const t = getCurrentTime()
+    const msg = `✅ ${store.state.userName} geht es gut – ${t} Uhr`
     if (phones) window.location.href = `sms:${phones}?body=${encodeURIComponent(msg)}`
-    localStorage.setItem('ilocare_last_ok', getCurrentTime())
+    localStorage.setItem('ilocare_last_ok', t)
+    localStorage.setItem('ilocare_mood', 'good')
+    localStorage.setItem('ilocare_mood_time', t)
+    // Bump store so Firebase sync fires immediately
+    store.updateState(s => ({ ...s }))
   }
 
   function navigate(s: Screen, contactId?: string) {
@@ -177,6 +192,29 @@ export default function App() {
       {showNightAlert && <NightModeAlert time={getCurrentTime()} contacts={store.state.contacts} userName={store.state.userName} onDismiss={() => setShowNightAlert(false)} />}
     </>
   )
+
+  // ── Mode routing ──────────────────────────────────────────────────────────
+  if (appMode === 'welcome') {
+    return (
+      <WelcomeScreen
+        onSelectMode={mode => {
+          setAppMode(mode)
+          localStorage.setItem('ilocare_mode', mode)
+        }}
+      />
+    )
+  }
+
+  if (appMode === 'family') {
+    return (
+      <FamilyDashboardScreen
+        onSwitchMode={() => {
+          setAppMode('welcome')
+          localStorage.removeItem('ilocare_mode')
+        }}
+      />
+    )
+  }
 
   // ── Screens ───────────────────────────────────────────────────────────────
   if (screen === 'contacts') return <>{overlays}<ContactsScreen contacts={store.state.contacts} onBack={() => setScreen('dashboard')} /></>

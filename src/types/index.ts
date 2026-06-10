@@ -154,6 +154,37 @@ export interface AppState {
   painHistory: PainEntry[]
 }
 
+// ── App Mode ─────────────────────────────────────────────────────────────────
+export type AppMode = 'welcome' | 'senior' | 'family'
+
+// ── Family / Firebase ─────────────────────────────────────────────────────────
+export interface FamilySenior {
+  code: string
+  name: string
+}
+
+export interface SeniorSnapshot {
+  userName: string
+  lastActive: string
+  lastOkTime: string | null
+  checkedInToday: boolean
+  mood: 'good' | 'notgood' | null
+  moodTime: string | null
+  emergencyPhone: string | null
+  medications: {
+    allTaken: boolean
+    pendingCount: number
+    total: number
+    taken: number
+    list: { name: string; dosage: string; allTaken: boolean; pendingCount: number }[]
+  }
+  lastLocation: { address: string; timestamp: string; lat?: number; lon?: number } | null
+  painToday: number
+  lastPainSeverity: number | null
+  lastPainParts: string[]
+  healthRecord: { bloodType: string; allergies: string; conditions: string }
+}
+
 // ── API response types ───────────────────────────────────────────────────────
 export interface WeatherData {
   temp: number

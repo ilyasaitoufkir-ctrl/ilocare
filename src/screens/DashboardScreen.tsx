@@ -92,6 +92,8 @@ export function DashboardScreen({
     const t = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
     const msg = `⚠️ ${userName} fühlt sich nicht gut – ${t} Uhr. Bitte melde dich!`
     if (phones) window.location.href = `sms:${phones}?body=${encodeURIComponent(msg)}`
+    localStorage.setItem('ilocare_mood', 'notgood')
+    localStorage.setItem('ilocare_mood_time', t)
     setNotGoodSent(true)
     setTimeout(() => setNotGoodSent(false), 5000)
   }

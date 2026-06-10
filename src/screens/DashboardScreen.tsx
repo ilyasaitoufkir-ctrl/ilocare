@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import {
   Home, Users, Activity, MoreHorizontal,
-  CheckCircle, Heart, Clock, Shield,
-  ChevronRight,
+  Clock, Shield, ChevronRight,
 } from 'lucide-react'
 import { useClock } from '../hooks/useClock'
 import { useWeather } from '../hooks/useWeather'
@@ -51,34 +50,32 @@ function getCountdown(timeStr: string): string {
   return `in ${Math.floor(diff / 60)}h ${diff % 60}m`
 }
 
-const ALL_SERVICES: { screen: Screen; emoji: string; label: string; desc: string }[] = [
-  { screen: 'ilo',           emoji: '🤖', label: 'Ilo KI',       desc: 'Sprachassistent'  },
-  { screen: 'pain-tracker',  emoji: '🩺', label: 'Schmerzen',    desc: 'Schmerz Tracker'  },
-  { screen: 'health-record', emoji: '🏥', label: 'Gesundheitsakte', desc: 'Meine Akte'    },
-  { screen: 'family',        emoji: '👨‍👩‍👧', label: 'Familie',     desc: 'Familien-Status' },
-  { screen: 'shopping',      emoji: '🛒', label: 'Einkaufen',    desc: 'Einkaufsliste'    },
-  { screen: 'entertainment', emoji: '🎭', label: 'Unterhaltung', desc: 'News & Radio'     },
-  { screen: 'location',      emoji: '📍', label: 'Standort',     desc: 'Mein Standort'    },
-  { screen: 'insurance',     emoji: '💳', label: 'Krankenk.',    desc: 'Krankenkasse'     },
-  { screen: 'doctors',       emoji: '🏥', label: 'Ärzte',        desc: 'Meine Ärzte'      },
-  { screen: 'settings',      emoji: '⚙️', label: 'Einstellungen', desc: 'App verwalten'   },
+const MEHR_SERVICES: { screen: Screen; emoji: string; label: string; desc: string }[] = [
+  { screen: 'ilo',           emoji: '🤖', label: 'Ilo KI',         desc: 'Sprachassistent'  },
+  { screen: 'pain-tracker',  emoji: '🩺', label: 'Schmerzen',      desc: 'Schmerz Tracker'  },
+  { screen: 'family',        emoji: '👨‍👩‍👧', label: 'Familie',       desc: 'Familien-Status'  },
+  { screen: 'shopping',      emoji: '🛒', label: 'Einkaufen',      desc: 'Einkaufsliste'    },
+  { screen: 'location',      emoji: '📍', label: 'Standort',       desc: 'Mein Standort'    },
+  { screen: 'insurance',     emoji: '💳', label: 'Krankenkasse',   desc: 'Versicherung'     },
+  { screen: 'doctors',       emoji: '🏥', label: 'Ärzte',          desc: 'Meine Ärzte'      },
+  { screen: 'settings',      emoji: '⚙️', label: 'Einstellungen',  desc: 'App verwalten'    },
 ]
 
 const CARD_SHADOW = '0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04)'
 
 export function DashboardScreen({
-  userName, weatherCity, medications,
-  checkedInToday, lastCheckInTime, bloodType,
+  userName, weatherCity, medications, contacts,
   fallDetectionEnabled, onToggleFallDetection,
   onNavigate, onOkSend,
 }: DashboardScreenProps) {
   const { time, dayName, date, greeting } = useClock()
   const { data: weather } = useWeather(weatherCity)
   const [showOkConfirm, setShowOkConfirm] = useState(false)
+  const [showNotGoodConfirm, setShowNotGoodConfirm] = useState(false)
   const [okSent, setOkSent] = useState(false)
+  const [notGoodSent, setNotGoodSent] = useState(false)
   const [activeTab, setActiveTab] = useState<'home' | 'mehr'>('home')
 
-  const pendingCount = medications.reduce((n, m) => n + m.doses.filter(d => !d.taken).length, 0)
   const nextDose = getNextDose(medications)
   const initials = userName.slice(0, 2).toUpperCase()
 
@@ -89,44 +86,15 @@ export function DashboardScreen({
     setTimeout(() => setOkSent(false), 5000)
   }
 
-  const healthCards = [
-    {
-      bg: '#e8f4ff', border: '#bfdbfe',
-      icon: <CheckCircle size={26} color="#2563eb" strokeWidth={2} />,
-      value: checkedInToday ? (lastCheckInTime || '✓') : '—',
-      label: 'Check-in',
-      sublabel: checkedInToday ? 'Heute ✓' : 'Ausstehend',
-      textColor: '#1d4ed8',
-      action: null as (() => void) | null,
-    },
-    {
-      bg: '#fff0f0', border: '#fecaca',
-      icon: <Heart size={26} color="#dc2626" strokeWidth={2} />,
-      value: bloodType || '—',
-      label: 'Blutgruppe',
-      sublabel: bloodType ? 'Hinterlegt' : 'Nicht angegeben',
-      textColor: '#dc2626',
-      action: () => onNavigate('health-record'),
-    },
-    {
-      bg: '#e8fff8', border: '#a7f3d0',
-      icon: <Activity size={26} color="#059669" strokeWidth={2} />,
-      value: pendingCount > 0 ? `${pendingCount}` : '✓',
-      label: 'Medikamente',
-      sublabel: pendingCount > 0 ? 'Offen heute' : 'Alle eingenommen',
-      textColor: '#059669',
-      action: () => onNavigate('medications'),
-    },
-    {
-      bg: '#fff8e8', border: '#fcd34d',
-      icon: <Clock size={26} color="#d97706" strokeWidth={2} />,
-      value: nextDose ? nextDose.time : '—',
-      label: 'Nächste Dosis',
-      sublabel: nextDose ? getCountdown(nextDose.time) : 'Keine Einnahme',
-      textColor: '#d97706',
-      action: nextDose ? () => onNavigate('medications') : null,
-    },
-  ]
+  function handleNotGoodConfirmed() {
+    setShowNotGoodConfirm(false)
+    const phones = contacts.map(c => c.phone).filter(Boolean).join(',')
+    const t = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
+    const msg = `⚠️ ${userName} fühlt sich nicht gut – ${t} Uhr. Bitte melde dich!`
+    if (phones) window.location.href = `sms:${phones}?body=${encodeURIComponent(msg)}`
+    setNotGoodSent(true)
+    setTimeout(() => setNotGoodSent(false), 5000)
+  }
 
   return (
     <div className="screen" style={{ background: '#f8fffe' }}>
@@ -137,43 +105,69 @@ export function DashboardScreen({
           onNo={() => setShowOkConfirm(false)}
         />
       )}
+      {showNotGoodConfirm && (
+        <ConfirmDialog
+          message="Familie per SMS benachrichtigen? 🟡"
+          onYes={handleNotGoodConfirmed}
+          onNo={() => setShowNotGoodConfirm(false)}
+        />
+      )}
 
-      {/* ── Glassmorphism Header ─────────────────────────────────────────── */}
+      {/* ── Glass Header ────────────────────────────────────────────────── */}
       <div style={{
         flexShrink: 0,
-        background: 'rgba(255,255,255,0.85)',
+        background: 'rgba(255,255,255,0.88)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid rgba(255,255,255,0.8)',
         boxShadow: '0 2px 8px rgba(0,0,0,0.05)',
-        padding: '12px 20px',
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '10px 20px 12px',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
       }}>
-        <div>
-          <p style={{ margin: '0 0 2px', fontSize: '0.75rem', fontWeight: 500, color: '#8892a4', letterSpacing: '0.01em' }}>
-            {greeting} ✨
+        {/* Left: greeting + time + date */}
+        <div style={{ flex: 1 }}>
+          <p style={{ margin: '0 0 2px', fontSize: '0.78rem', fontWeight: 600, color: '#8892a4', letterSpacing: '0.01em' }}>
+            {greeting} ✨ {userName}
           </p>
-          <p style={{ margin: 0, fontSize: '1.45rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.03em', lineHeight: 1.1 }}>
-            {userName}
+          <span style={{
+            fontSize: '3rem', fontWeight: 800, color: '#1a1a2e',
+            letterSpacing: '-0.05em', lineHeight: 1, display: 'block',
+            fontVariantNumeric: 'tabular-nums',
+          }}>
+            {time}
+          </span>
+          <p style={{ margin: '3px 0 0', fontSize: '1rem', fontWeight: 600, color: '#8892a4', letterSpacing: '-0.01em' }}>
+            {dayName}, {date}
           </p>
         </div>
-        <button
-          onClick={() => onNavigate('settings')}
-          style={{
-            width: '50px', height: '50px', borderRadius: '50%',
-            background: 'linear-gradient(135deg, #00c896 0%, #00a67e 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            border: '2.5px solid rgba(255,255,255,0.9)',
-            boxShadow: '0 4px 14px rgba(0,200,150,0.35)',
-          }}
-        >
-          <span style={{
-            fontSize: '1.05rem', fontWeight: 800, color: '#fff',
-            fontFamily: "'Inter', sans-serif", letterSpacing: '-0.01em',
-          }}>
-            {initials}
-          </span>
-        </button>
+
+        {/* Right: avatar + weather */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', flexShrink: 0 }}>
+          <button
+            onClick={() => onNavigate('settings')}
+            style={{
+              width: '52px', height: '52px', borderRadius: '50%',
+              background: 'linear-gradient(135deg, #00c896 0%, #00a67e 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              border: '2.5px solid rgba(255,255,255,0.9)',
+              boxShadow: '0 4px 14px rgba(0,200,150,0.35)',
+            }}
+          >
+            <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#fff', fontFamily: "'Inter', sans-serif", letterSpacing: '-0.01em' }}>
+              {initials}
+            </span>
+          </button>
+          {weather && (
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: '5px',
+              background: '#f0fdf8', borderRadius: '20px',
+              padding: '4px 10px', border: '1px solid #a7f3d0',
+            }}>
+              <span style={{ fontSize: '1rem', lineHeight: 1 }}>{weather.icon}</span>
+              <span style={{ fontSize: '0.88rem', fontWeight: 700, color: '#00a67e' }}>{weather.temp}°C</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* ── Scrollable Content ──────────────────────────────────────────── */}
@@ -186,161 +180,168 @@ export function DashboardScreen({
 
         {activeTab === 'home' ? (
           <>
-            {/* ── Clock Card ──────────────────────────────────────────────── */}
-            <div style={{
-              background: '#ffffff', borderRadius: '24px',
-              padding: '18px 22px',
-              boxShadow: CARD_SHADOW,
-              border: '1px solid rgba(255,255,255,0.8)',
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-            }}>
-              <span style={{
-                fontSize: '3.2rem', fontWeight: 800, color: '#1a1a2e',
-                letterSpacing: '-0.04em', lineHeight: 1,
-                fontVariantNumeric: 'tabular-nums',
-              }}>
-                {time}
-              </span>
-              <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 700, color: '#1a1a2e', letterSpacing: '-0.01em' }}>
-                  {dayName}
-                </p>
-                <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 500, color: '#8892a4' }}>
-                  {date}
-                </p>
-              </div>
-            </div>
-
-            {/* ── Weather Card ─────────────────────────────────────────────── */}
-            {weather ? (
+            {/* ── ✅ ICH BIN OK (huge, top) ─────────────────────────────── */}
+            {okSent ? (
               <div style={{
+                borderRadius: '28px', padding: '28px 24px', textAlign: 'center',
                 background: 'linear-gradient(135deg, #00c896 0%, #00a67e 100%)',
-                borderRadius: '24px', padding: '18px 22px',
-                boxShadow: '0 8px 28px rgba(0,200,150,0.3)',
-                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                boxShadow: '0 8px 32px rgba(0,200,150,0.4)',
               }}>
-                <div>
-                  <span style={{
-                    fontSize: '3.4rem', fontWeight: 800, color: '#fff',
-                    lineHeight: 1, display: 'block', letterSpacing: '-0.04em',
-                    fontVariantNumeric: 'tabular-nums',
-                  }}>
-                    {weather.temp}°
-                  </span>
-                  <p style={{ margin: '4px 0 2px', fontSize: '0.88rem', fontWeight: 600, color: 'rgba(255,255,255,0.9)' }}>
-                    {weatherCity}, heute
-                  </p>
-                  <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 500, color: 'rgba(255,255,255,0.75)' }}>
-                    {weather.description}
-                  </p>
-                </div>
-                <span style={{ fontSize: '3.8rem', lineHeight: 1 }}>{weather.icon}</span>
+                <p style={{ margin: 0, fontSize: '1.4rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+                  Familie wurde informiert! ✅
+                </p>
               </div>
             ) : (
-              <div style={{
-                background: 'linear-gradient(135deg, #00c896 0%, #00a67e 100%)',
-                borderRadius: '24px', padding: '18px 22px',
-                boxShadow: '0 8px 28px rgba(0,200,150,0.25)',
-                display: 'flex', alignItems: 'center', gap: '12px',
-              }}>
-                <span style={{ fontSize: '2rem' }}>🌤️</span>
-                <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
-                  Wetter wird geladen...
-                </p>
-              </div>
+              <button
+                onClick={() => setShowOkConfirm(true)}
+                style={{
+                  width: '100%', borderRadius: '28px',
+                  background: 'linear-gradient(135deg, #00c896 0%, #00a67e 100%)',
+                  minHeight: '110px',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '6px',
+                  boxShadow: '0 8px 32px rgba(0,200,150,0.4)',
+                  border: '2px solid rgba(255,255,255,0.5)',
+                }}
+              >
+                <span style={{ fontSize: '2.4rem', lineHeight: 1 }}>✅</span>
+                <span style={{ fontSize: '1.5rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+                  ICH BIN OK
+                </span>
+                <span style={{ fontSize: '0.82rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+                  Familie per SMS informieren
+                </span>
+              </button>
             )}
 
-            {/* ── Health Cards 2x2 ─────────────────────────────────────────── */}
+            {/* ── 🟡 MIR GEHT ES NICHT GUT ─────────────────────────────── */}
+            {notGoodSent ? (
+              <div style={{
+                borderRadius: '28px', padding: '24px', textAlign: 'center',
+                background: 'linear-gradient(135deg, #ff9f43 0%, #ee5a24 100%)',
+                boxShadow: '0 6px 24px rgba(255,159,67,0.4)',
+              }}>
+                <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+                  Familie wurde benachrichtigt! ⚠️
+                </p>
+              </div>
+            ) : (
+              <button
+                onClick={() => setShowNotGoodConfirm(true)}
+                style={{
+                  width: '100%', borderRadius: '28px',
+                  background: 'linear-gradient(135deg, #ff9f43 0%, #f0932b 100%)',
+                  minHeight: '90px',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '5px',
+                  boxShadow: '0 6px 24px rgba(255,159,67,0.4)',
+                  border: '2px solid rgba(255,255,255,0.4)',
+                }}
+              >
+                <span style={{ fontSize: '2rem', lineHeight: 1 }}>🟡</span>
+                <span style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em' }}>
+                  MIR GEHT ES NICHT GUT
+                </span>
+                <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+                  Familie benachrichtigen
+                </span>
+              </button>
+            )}
+
+            {/* ── 2 × 2 Navigation Grid ──────────────────────────────────── */}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {healthCards.map((card, i) => (
-                <button
-                  key={i}
-                  onClick={card.action ?? undefined}
-                  disabled={!card.action}
-                  style={{
-                    background: card.bg, borderRadius: '20px',
-                    border: `1.5px solid ${card.border}`,
-                    padding: '14px 14px',
-                    display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '8px',
-                    boxShadow: CARD_SHADOW,
-                    textAlign: 'left',
-                    minHeight: '90px',
-                    cursor: card.action ? 'pointer' : 'default',
-                  }}
-                >
-                  {card.icon}
-                  <div>
-                    <p style={{ margin: '0 0 1px', fontSize: '1.15rem', fontWeight: 800, color: card.textColor, letterSpacing: '-0.02em', lineHeight: 1 }}>
-                      {card.value}
-                    </p>
-                    <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 600, color: '#8892a4', lineHeight: 1.2 }}>
-                      {card.label}
-                    </p>
-                  </div>
-                </button>
-              ))}
+              {/* Kontakte */}
+              <button
+                onClick={() => onNavigate('contacts')}
+                style={{
+                  borderRadius: '24px', padding: '18px 12px', minHeight: '100px',
+                  background: '#e8f4ff', border: '1.5px solid #bfdbfe',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: CARD_SHADOW,
+                }}
+              >
+                <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>👥</span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1d4ed8', letterSpacing: '-0.02em', textAlign: 'center' }}>
+                  KONTAKTE
+                </span>
+              </button>
+
+              {/* Medikamente */}
+              <button
+                onClick={() => onNavigate('medications')}
+                style={{
+                  borderRadius: '24px', padding: '18px 12px', minHeight: '100px',
+                  background: '#f3e8ff', border: '1.5px solid #d8b4fe',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: CARD_SHADOW,
+                }}
+              >
+                <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>💊</span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#7c3aed', letterSpacing: '-0.02em', textAlign: 'center' }}>
+                  MEDIKAMENTE
+                </span>
+              </button>
+
+              {/* Unterhaltung */}
+              <button
+                onClick={() => onNavigate('entertainment')}
+                style={{
+                  borderRadius: '24px', padding: '18px 12px', minHeight: '100px',
+                  background: '#e8fff8', border: '1.5px solid #a7f3d0',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: CARD_SHADOW,
+                }}
+              >
+                <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>🎭</span>
+                <span style={{ fontSize: '1.05rem', fontWeight: 800, color: '#059669', letterSpacing: '-0.02em', textAlign: 'center' }}>
+                  UNTERHALTUNG
+                </span>
+              </button>
+
+              {/* Gesundheitsakte */}
+              <button
+                onClick={() => onNavigate('health-record')}
+                style={{
+                  borderRadius: '24px', padding: '18px 12px', minHeight: '100px',
+                  background: '#fff0f0', border: '1.5px solid #fecaca',
+                  display: 'flex', flexDirection: 'column',
+                  alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  boxShadow: CARD_SHADOW,
+                }}
+              >
+                <span style={{ fontSize: '2.2rem', lineHeight: 1 }}>🏥</span>
+                <span style={{ fontSize: '1.0rem', fontWeight: 800, color: '#dc2626', letterSpacing: '-0.02em', textAlign: 'center', lineHeight: 1.2 }}>
+                  GESUNDHEITS-{'\n'}AKTE
+                </span>
+              </button>
             </div>
 
-            {/* ── OK + SOS Buttons ─────────────────────────────────────────── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {okSent ? (
-                <div style={{
-                  gridColumn: '1 / -1', borderRadius: '24px', padding: '22px',
-                  background: 'linear-gradient(135deg, #00c896, #00a67e)',
-                  textAlign: 'center', boxShadow: '0 8px 28px rgba(0,200,150,0.35)',
-                }}>
-                  <p style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>
-                    Familie wurde informiert! ✅
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <button
-                    onClick={() => setShowOkConfirm(true)}
-                    style={{
-                      background: 'linear-gradient(135deg, #00c896 0%, #00a67e 100%)',
-                      borderRadius: '24px', padding: '20px 12px',
-                      minHeight: '110px',
-                      display: 'flex', flexDirection: 'column',
-                      alignItems: 'center', justifyContent: 'center', gap: '6px',
-                      boxShadow: '0 8px 28px rgba(0,200,150,0.4)',
-                      border: '1.5px solid rgba(255,255,255,0.5)',
-                    }}
-                  >
-                    <span style={{ fontSize: '2rem', lineHeight: 1 }}>✅</span>
-                    <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', textAlign: 'center' }}>
-                      ICH BIN OK
-                    </p>
-                    <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 500, color: 'rgba(255,255,255,0.85)', textAlign: 'center', lineHeight: 1.3 }}>
-                      Familie informieren
-                    </p>
-                  </button>
+            {/* ── 🆘 SOS NOTFALL (bottom, red) ──────────────────────────── */}
+            <button
+              onClick={() => onNavigate('emergency')}
+              className="sos-pulse"
+              style={{
+                width: '100%', borderRadius: '28px',
+                background: 'linear-gradient(135deg, #ff4757 0%, #c0392b 100%)',
+                minHeight: '90px',
+                display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center', gap: '5px',
+                border: '2px solid rgba(255,255,255,0.35)',
+              }}
+            >
+              <span style={{ fontSize: '2rem', lineHeight: 1 }}>🆘</span>
+              <span style={{ fontSize: '1.3rem', fontWeight: 900, color: '#fff', letterSpacing: '0.02em' }}>
+                SOS NOTFALL
+              </span>
+              <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'rgba(255,255,255,0.85)' }}>
+                Notruf & Familie sofort informieren
+              </span>
+            </button>
 
-                  <button
-                    onClick={() => onNavigate('emergency')}
-                    className="sos-pulse"
-                    style={{
-                      background: 'linear-gradient(135deg, #ff4757 0%, #c0392b 100%)',
-                      borderRadius: '24px', padding: '20px 12px',
-                      minHeight: '110px',
-                      display: 'flex', flexDirection: 'column',
-                      alignItems: 'center', justifyContent: 'center', gap: '6px',
-                      border: '1.5px solid rgba(255,255,255,0.4)',
-                    }}
-                  >
-                    <span style={{ fontSize: '2rem', lineHeight: 1 }}>🆘</span>
-                    <p style={{ margin: 0, fontSize: '0.95rem', fontWeight: 900, color: '#fff', letterSpacing: '-0.02em', textAlign: 'center' }}>
-                      SOS NOTFALL
-                    </p>
-                    <p style={{ margin: 0, fontSize: '0.65rem', fontWeight: 500, color: 'rgba(255,255,255,0.85)', textAlign: 'center', lineHeight: 1.3 }}>
-                      Notruf auslösen
-                    </p>
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* ── Next Medication ───────────────────────────────────────────── */}
+            {/* ── Medication reminder ────────────────────────────────────── */}
             {nextDose && (
               <button
                 onClick={() => onNavigate('medications')}
@@ -373,7 +374,7 @@ export function DashboardScreen({
               </button>
             )}
 
-            {/* ── Fall Detection ────────────────────────────────────────────── */}
+            {/* ── Fall Detection Toggle ──────────────────────────────────── */}
             <button
               onClick={onToggleFallDetection}
               style={{
@@ -395,7 +396,7 @@ export function DashboardScreen({
                   <Shield size={22} color={fallDetectionEnabled ? '#dc2626' : '#059669'} strokeWidth={2} />
                 </div>
                 <div>
-                  <p style={{ margin: '0 0 2px', fontSize: '1rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.02em' }}>
+                  <p style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.02em' }}>
                     Sturzerkennung
                   </p>
                   <p style={{ margin: 0, fontSize: '0.72rem', fontWeight: 500, color: '#8892a4' }}>
@@ -407,7 +408,6 @@ export function DashboardScreen({
                 width: '46px', height: '26px', borderRadius: '13px',
                 background: fallDetectionEnabled ? '#00c896' : '#e2e8f0',
                 position: 'relative', flexShrink: 0,
-                transition: 'background 0.2s ease',
               }}>
                 <div style={{
                   position: 'absolute', top: '3px',
@@ -421,13 +421,13 @@ export function DashboardScreen({
             </button>
           </>
         ) : (
-          /* ── Mehr / Services Grid ─────────────────────────────────────── */
+          /* ── Mehr / Services ────────────────────────────────────────── */
           <>
             <p style={{ margin: 0, fontSize: '1.3rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.03em' }}>
               Alle Services
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {ALL_SERVICES.map(svc => (
+              {MEHR_SERVICES.map(svc => (
                 <button
                   key={svc.screen}
                   onClick={() => onNavigate(svc.screen)}
@@ -436,11 +436,12 @@ export function DashboardScreen({
                     padding: '16px 14px',
                     display: 'flex', alignItems: 'center', gap: '12px', textAlign: 'left',
                     boxShadow: CARD_SHADOW, border: '1px solid rgba(255,255,255,0.8)',
+                    minHeight: '72px',
                   }}
                 >
-                  <span style={{ fontSize: '1.7rem', lineHeight: 1, flexShrink: 0 }}>{svc.emoji}</span>
+                  <span style={{ fontSize: '1.8rem', lineHeight: 1, flexShrink: 0 }}>{svc.emoji}</span>
                   <div>
-                    <p style={{ margin: '0 0 1px', fontSize: '0.88rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.01em' }}>
+                    <p style={{ margin: '0 0 1px', fontSize: '0.92rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.01em' }}>
                       {svc.label}
                     </p>
                     <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 500, color: '#8892a4' }}>
@@ -466,10 +467,10 @@ export function DashboardScreen({
         padding: '8px 0 calc(8px + env(safe-area-inset-bottom, 0px))',
       }}>
         {[
-          { id: 'home' as const, icon: <Home size={24} strokeWidth={2} />, label: 'Home', nav: null },
-          { id: 'contacts' as const, icon: <Users size={24} strokeWidth={2} />, label: 'Kontakte', nav: 'contacts' as Screen },
-          { id: 'medications' as const, icon: <Activity size={24} strokeWidth={2} />, label: 'Medis', nav: 'medications' as Screen },
-          { id: 'mehr' as const, icon: <MoreHorizontal size={24} strokeWidth={2} />, label: 'Mehr', nav: null },
+          { id: 'home',        icon: <Home size={24} strokeWidth={2} />,          label: 'Home',     nav: null                  },
+          { id: 'contacts',    icon: <Users size={24} strokeWidth={2} />,          label: 'Kontakte', nav: 'contacts' as Screen  },
+          { id: 'medications', icon: <Activity size={24} strokeWidth={2} />,       label: 'Medis',    nav: 'medications' as Screen },
+          { id: 'mehr',        icon: <MoreHorizontal size={24} strokeWidth={2} />, label: 'Mehr',     nav: null                  },
         ].map(tab => {
           const isActive = tab.id === 'home' ? activeTab === 'home' : tab.id === 'mehr' ? activeTab === 'mehr' : false
           return (
@@ -487,10 +488,7 @@ export function DashboardScreen({
               }}
             >
               {tab.icon}
-              <span style={{
-                fontSize: '0.6rem', fontWeight: isActive ? 700 : 500,
-                letterSpacing: '0.01em',
-              }}>
+              <span style={{ fontSize: '0.6rem', fontWeight: isActive ? 700 : 500 }}>
                 {tab.label}
               </span>
               {isActive && (

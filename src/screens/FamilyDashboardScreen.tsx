@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import {
   Heart, ArrowLeft, Plus, Phone, MessageCircle, MapPin,
-  CheckCircle, Clock, AlertTriangle, RefreshCw, Activity,
+  CheckCircle2, Clock, AlertTriangle, RefreshCw, Activity,
+  Pill, Smile, Frown, Meh, Navigation, User,
 } from 'lucide-react'
 import { doc, onSnapshot, getDoc } from 'firebase/firestore'
 import { getDb, isFirebaseConfigured } from '../lib/firebase'
@@ -199,9 +200,12 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
               }}
             />
             {connectError && (
-              <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: '#dc2626', textAlign: 'center' }}>
-                ⚠️ {connectError}
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <AlertTriangle size={16} color="#dc2626" strokeWidth={2} />
+                <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 600, color: '#dc2626' }}>
+                  {connectError}
+                </p>
+              </div>
             )}
             <button
               onClick={handleConnect}
@@ -225,9 +229,12 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
 
           {!isFirebaseConfigured() && (
             <div style={{ maxWidth: '360px', borderRadius: '18px', padding: '16px 18px', background: '#fffbeb', border: '1.5px solid #fcd34d' }}>
-              <p style={{ margin: '0 0 8px', fontSize: '0.9rem', fontWeight: 700, color: '#d97706' }}>
-                ⚠️ Firebase nicht konfiguriert
-              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '8px' }}>
+                <AlertTriangle size={16} color="#d97706" strokeWidth={2} />
+                <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#d97706' }}>
+                  Firebase nicht konfiguriert
+                </p>
+              </div>
               <p style={{ margin: '0 0 10px', fontSize: '0.82rem', fontWeight: 500, color: '#92400e', lineHeight: 1.6 }}>
                 Für Echtzeit-Updates Firebase einrichten. Füge diese Variablen in deine .env Datei ein:
               </p>
@@ -344,9 +351,8 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
             width: '64px', height: '64px', borderRadius: '50%',
             background: 'rgba(255,255,255,0.25)', flexShrink: 0,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: '2.4rem', lineHeight: 1,
           }}>
-            👴
+            <User size={32} color="#fff" strokeWidth={2} />
           </div>
         </div>
 
@@ -361,9 +367,12 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
         {/* Firebase not configured */}
         {error === 'firebase_not_configured' && !loading && (
           <div style={{ borderRadius: '24px', padding: '22px', background: '#fffbeb', border: '1.5px solid #fcd34d', boxShadow: CARD_SHADOW }}>
-            <p style={{ margin: '0 0 8px', fontSize: '1rem', fontWeight: 800, color: '#d97706' }}>
-              ⚠️ Firebase nicht konfiguriert
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <AlertTriangle size={18} color="#d97706" strokeWidth={2} />
+              <p style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: '#d97706' }}>
+                Firebase nicht konfiguriert
+              </p>
+            </div>
             <p style={{ margin: '0 0 14px', fontSize: '0.85rem', fontWeight: 500, color: '#92400e', lineHeight: 1.65 }}>
               Für Live-Daten muss Firebase eingerichtet werden. Füge diese Variablen in deine .env Datei ein und starte die App neu:
             </p>
@@ -404,7 +413,7 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
                   {snapshot.checkedInToday
-                    ? <CheckCircle size={17} color="#00c896" strokeWidth={2.5} />
+                    ? <CheckCircle2 size={17} color="#00c896" strokeWidth={2.5} />
                     : <Clock size={17} color="#d97706" strokeWidth={2.5} />
                   }
                   <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 700, color: '#8892a4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
@@ -412,7 +421,7 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
                   </p>
                 </div>
                 <p style={{ margin: '0 0 3px', fontSize: '0.95rem', fontWeight: 800, color: snapshot.checkedInToday ? '#059669' : '#d97706', letterSpacing: '-0.01em' }}>
-                  {snapshot.checkedInToday ? 'Heute ✅' : 'Noch nicht ⚠️'}
+                  {snapshot.checkedInToday ? 'Heute' : 'Noch nicht'}
                 </p>
                 {snapshot.lastOkTime && (
                   <p style={{ margin: 0, fontSize: '0.73rem', fontWeight: 500, color: '#8892a4' }}>
@@ -429,7 +438,7 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
                 boxShadow: CARD_SHADOW,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '0.95rem', lineHeight: 1 }}>💊</span>
+                  <Pill size={17} color="#f59e0b" strokeWidth={2} />
                   <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 700, color: '#8892a4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Medis
                   </p>
@@ -438,8 +447,8 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
                   {snapshot.medications.total === 0
                     ? 'Keine'
                     : snapshot.medications.allTaken
-                      ? 'Alle ✅'
-                      : `${snapshot.medications.pendingCount} offen ⚠️`}
+                      ? 'Alle eingenommen'
+                      : `${snapshot.medications.pendingCount} ausstehend`}
                 </p>
                 {snapshot.medications.total > 0 && (
                   <p style={{ margin: 0, fontSize: '0.73rem', fontWeight: 500, color: '#8892a4' }}>
@@ -456,15 +465,18 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
                 boxShadow: CARD_SHADOW,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
-                  <span style={{ fontSize: '0.95rem', lineHeight: 1 }}>
-                    {snapshot.mood === 'good' ? '😊' : snapshot.mood === 'notgood' ? '😔' : '🤔'}
-                  </span>
+                  {snapshot.mood === 'good'
+                    ? <Smile size={17} color="#00c896" strokeWidth={2} />
+                    : snapshot.mood === 'notgood'
+                      ? <Frown size={17} color="#dc2626" strokeWidth={2} />
+                      : <Meh size={17} color="#8892a4" strokeWidth={2} />
+                  }
                   <p style={{ margin: 0, fontSize: '0.7rem', fontWeight: 700, color: '#8892a4', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                     Stimmung
                   </p>
                 </div>
                 <p style={{ margin: '0 0 3px', fontSize: '0.95rem', fontWeight: 800, letterSpacing: '-0.01em', color: snapshot.mood === 'good' ? '#059669' : snapshot.mood === 'notgood' ? '#dc2626' : '#8892a4' }}>
-                  {snapshot.mood === 'good' ? 'Gut 😊' : snapshot.mood === 'notgood' ? 'Nicht gut 😔' : 'Unbekannt'}
+                  {snapshot.mood === 'good' ? 'Gut' : snapshot.mood === 'notgood' ? 'Nicht gut' : 'Unbekannt'}
                 </p>
                 {snapshot.moodTime && (
                   <p style={{ margin: 0, fontSize: '0.73rem', fontWeight: 500, color: '#8892a4' }}>
@@ -520,8 +532,8 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
                 </p>
                 <p style={{ margin: 0, fontSize: '1rem', fontWeight: 800, color: snapshot.painToday === 0 ? '#059669' : '#dc2626', letterSpacing: '-0.01em' }}>
                   {snapshot.painToday === 0
-                    ? 'Keine gemeldet ✅'
-                    : `${snapshot.painToday} Meldung${snapshot.painToday > 1 ? 'en' : ''} ⚠️`}
+                    ? 'Keine gemeldet'
+                    : `${snapshot.painToday} Meldung${snapshot.painToday > 1 ? 'en'  : ''}`}
                 </p>
                 {snapshot.lastPainSeverity !== null && snapshot.lastPainParts.length > 0 && (
                   <p style={{ margin: '2px 0 0', fontSize: '0.73rem', fontWeight: 500, color: '#8892a4' }}>
@@ -545,7 +557,9 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
                     borderBottom: i < snapshot.medications.list.length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none',
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <span style={{ fontSize: '1.4rem' }}>💊</span>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: '#f3e8ff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Pill size={20} color="#8b5cf6" strokeWidth={2} />
+                      </div>
                       <div>
                         <p style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 700, color: '#1a1a2e' }}>{m.name}</p>
                         <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 500, color: '#8892a4' }}>{m.dosage}</p>
@@ -594,7 +608,7 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
                   }}
                   style={{ padding: '18px 8px', border: 'none', background: '#e8f4ff', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', cursor: 'pointer' }}
                 >
-                  <MapPin size={22} color="#2563eb" strokeWidth={2} />
+                  <Navigation size={22} color="#3b82f6" strokeWidth={2} />
                   <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1d4ed8' }}>Standort</span>
                 </button>
               </div>
@@ -619,7 +633,9 @@ export function FamilyDashboardScreen({ onSwitchMode }: FamilyDashboardScreenPro
               background: s.code === activeCode ? '#f0fdf8' : '#fff',
             }}>
               <button onClick={() => switchSenior(s.code)} style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', flex: 1 }}>
-                <span style={{ fontSize: '1.6rem' }}>👴</span>
+                <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: '#e8fff8', border: '1.5px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <User size={20} color="#00c896" strokeWidth={2} />
+                </div>
                 <div>
                   <p style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 700, color: '#1a1a2e' }}>{s.name}</p>
                   <p style={{ margin: 0, fontSize: '0.75rem', fontWeight: 500, color: '#8892a4' }}>Code: {s.code}</p>

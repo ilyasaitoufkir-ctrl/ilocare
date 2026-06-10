@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react'
-import { Phone, Video, Mic, MicOff, Camera } from 'lucide-react'
+import { Phone, Video, MessageCircle, Mic, MicOff, Camera } from 'lucide-react'
 import { Header } from '../components/Header'
 import type { Contact } from '../types'
 
@@ -13,11 +13,22 @@ interface RecordingState {
   mr: MediaRecorder
 }
 
-function ContactCard({ contact }: { contact: Contact }) {
+const CARD_SHADOW = '0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04)'
+
+const AVATAR_COLORS = [
+  ['#e8fff8', '#00c896'],
+  ['#e8f4ff', '#2563eb'],
+  ['#fff0f0', '#dc2626'],
+  ['#fffbeb', '#d97706'],
+  ['#f3e8ff', '#7c3aed'],
+]
+
+function ContactCard({ contact, index }: { contact: Contact; index: number }) {
   const photoInputRef = useRef<HTMLInputElement>(null)
   const [recording, setRecording] = useState(false)
   const [recState, setRecState] = useState<RecordingState | null>(null)
   const [sent, setSent] = useState<'photo' | 'voice' | null>(null)
+  const [avatarBg, avatarText] = AVATAR_COLORS[index % AVATAR_COLORS.length]
 
   function handleCall() {
     if (contact.phone) window.location.href = `tel:${contact.phone}`
@@ -25,6 +36,10 @@ function ContactCard({ contact }: { contact: Contact }) {
 
   function handleVideo() {
     if (contact.phone) window.location.href = `facetime:${contact.phone}`
+  }
+
+  function handleMessage() {
+    if (contact.phone) window.location.href = `sms:${contact.phone}`
   }
 
   function handlePhotoFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -60,105 +75,138 @@ function ContactCard({ contact }: { contact: Contact }) {
     setRecording(false)
   }
 
+  const initials = contact.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+
   return (
-    <div
-      className="rounded-3xl p-5 flex flex-col gap-4"
-      style={{
-        background: 'rgba(255,255,255,0.92)',
-        backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)',
-        border: '1.5px solid rgba(255,255,255,0.65)',
-        boxShadow: '0 4px 20px rgba(42,157,143,0.12)',
-      }}
-    >
-      {/* Foto & Name */}
-      <div className="flex flex-col items-center gap-2">
-        <div
-          className="rounded-full overflow-hidden flex items-center justify-center"
-          style={{ width: '110px', height: '110px', backgroundColor: 'rgba(255,255,255,0.88)', border: '4px solid #7ececa' }}
-        >
+    <div style={{
+      background: '#ffffff', borderRadius: '28px',
+      padding: '20px', boxShadow: CARD_SHADOW,
+      border: '1px solid rgba(255,255,255,0.8)',
+      display: 'flex', flexDirection: 'column', gap: '16px',
+    }}>
+      {/* Avatar + Name */}
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+        <div style={{
+          width: '96px', height: '96px', borderRadius: '50%',
+          overflow: 'hidden', flexShrink: 0,
+          background: avatarBg,
+          border: `3px solid ${avatarText}33`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: `0 4px 14px ${avatarText}22`,
+        }}>
           {contact.photo
             ? <img src={contact.photo} alt={contact.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            : <span style={{ fontSize: '3.5rem' }}>👤</span>
+            : <span style={{ fontSize: '1.6rem', fontWeight: 800, color: avatarText, fontFamily: "'Inter', sans-serif", letterSpacing: '-0.02em' }}>
+                {initials}
+              </span>
           }
         </div>
-        <p style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0d2b27', margin: 0 }}>
-          {contact.name}
-        </p>
-        {contact.phone && (
-          <p style={{ fontSize: '1rem', color: '#2a9d8f', margin: 0 }}>{contact.phone}</p>
-        )}
-        {contact.isEmergency && (
-          <span
-            className="px-3 py-1 rounded-full"
-            style={{ backgroundColor: '#fef2f2', color: '#dc2626', fontSize: '0.9rem', fontWeight: 700, border: '1px solid #fca5a5' }}
-          >
-            🚨 Notfallkontakt
-          </span>
-        )}
+        <div style={{ textAlign: 'center' }}>
+          <p style={{ margin: '0 0 3px', fontSize: '1.3rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.03em' }}>
+            {contact.name}
+          </p>
+          {contact.phone && (
+            <p style={{ margin: '0 0 4px', fontSize: '0.85rem', fontWeight: 500, color: '#8892a4' }}>
+              {contact.phone}
+            </p>
+          )}
+          {contact.isEmergency && (
+            <span style={{
+              display: 'inline-block', fontSize: '0.72rem', fontWeight: 700,
+              color: '#dc2626', background: '#fff0f0',
+              padding: '3px 10px', borderRadius: '20px', border: '1px solid #fecaca',
+            }}>
+              Notfallkontakt
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Erfolgs-Banner */}
+      {/* 3 Action Buttons */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+        <button
+          onClick={handleCall}
+          style={{
+            borderRadius: '18px', padding: '14px 8px', minHeight: '76px',
+            background: '#e8fff8', border: '1.5px solid #a7f3d0',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          }}
+        >
+          <Phone size={24} color="#00c896" strokeWidth={2} />
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#00a67e' }}>Anrufen</span>
+        </button>
+        <button
+          onClick={handleVideo}
+          style={{
+            borderRadius: '18px', padding: '14px 8px', minHeight: '76px',
+            background: '#e8f4ff', border: '1.5px solid #bfdbfe',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          }}
+        >
+          <Video size={24} color="#2563eb" strokeWidth={2} />
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#1d4ed8' }}>Video</span>
+        </button>
+        <button
+          onClick={handleMessage}
+          style={{
+            borderRadius: '18px', padding: '14px 8px', minHeight: '76px',
+            background: '#f3e8ff', border: '1.5px solid #d8b4fe',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '6px',
+          }}
+        >
+          <MessageCircle size={24} color="#7c3aed" strokeWidth={2} />
+          <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6d28d9' }}>Nachricht</span>
+        </button>
+      </div>
+
+      {/* Feedback banner */}
       {sent && (
-        <div className="rounded-2xl p-3 text-center" style={{ backgroundColor: '#dcfce7', border: '2px solid #86efac' }}>
-          <p style={{ fontSize: '1rem', fontWeight: 700, color: '#166534', margin: 0 }}>
-            {sent === 'photo' ? '📸 Foto gesendet!' : '🎤 Sprachnachricht gesendet!'}
+        <div style={{ borderRadius: '16px', padding: '12px 16px', background: '#f0fdf8', border: '1.5px solid #a7f3d0', textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: '#059669' }}>
+            {sent === 'photo' ? 'Foto gesendet! 📸' : 'Sprachnachricht gesendet! 🎤'}
           </p>
         </div>
       )}
 
-      {/* Anruf + Video */}
-      <div className="flex gap-3">
-        <button
-          onClick={handleCall}
-          className="flex-1 flex flex-col items-center justify-center gap-2 rounded-2xl active:scale-95 transition-transform"
-          style={{ backgroundColor: '#dcfce7', border: '2px solid #86efac', minHeight: '88px' }}
-        >
-          <Phone size={30} color="#16a34a" />
-          <span style={{ fontSize: '1rem', fontWeight: 800, color: '#16a34a' }}>📞 Anrufen</span>
-        </button>
-        <button
-          onClick={handleVideo}
-          className="flex-1 flex flex-col items-center justify-center gap-2 rounded-2xl active:scale-95 transition-transform"
-          style={{ backgroundColor: '#dbeafe', border: '2px solid #93c5fd', minHeight: '88px' }}
-        >
-          <Video size={30} color="#2563eb" />
-          <span style={{ fontSize: '1rem', fontWeight: 800, color: '#2563eb' }}>🎥 Video</span>
-        </button>
-      </div>
-
-      {/* Foto schicken */}
+      {/* Camera */}
       <button
         onClick={() => photoInputRef.current?.click()}
-        className="w-full flex items-center gap-4 rounded-2xl active:scale-95 transition-transform"
-        style={{ backgroundColor: '#fff7ed', border: '2px solid #fed7aa', minHeight: '80px', padding: '0 20px' }}
+        style={{
+          borderRadius: '18px', padding: '0 18px', minHeight: '58px',
+          background: '#f8fffe', border: '1.5px solid #e2e8f0',
+          display: 'flex', alignItems: 'center', gap: '12px',
+        }}
       >
-        <Camera size={28} color="#c2410c" />
-        <span style={{ fontSize: '1.1rem', fontWeight: 800, color: '#c2410c' }}>📸 Foto schicken</span>
+        <Camera size={22} color="#8892a4" strokeWidth={2} />
+        <span style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1a1a2e' }}>Foto schicken</span>
       </button>
       <input ref={photoInputRef} type="file" accept="image/*" capture="environment" onChange={handlePhotoFile} style={{ display: 'none' }} />
 
-      {/* Sprachnachricht */}
+      {/* Voice message */}
       <button
         onPointerDown={startRecording}
         onPointerUp={stopRecording}
         onPointerLeave={recording ? stopRecording : undefined}
-        className="w-full flex items-center gap-4 rounded-2xl transition-transform"
         style={{
-          backgroundColor: recording ? '#fef2f2' : '#f0fdf4',
-          border: `2px solid ${recording ? '#fca5a5' : '#86efac'}`,
-          minHeight: '80px',
-          padding: '0 20px',
+          borderRadius: '18px', padding: '0 18px', minHeight: '58px',
+          background: recording ? '#fff0f0' : '#f8fffe',
+          border: `1.5px solid ${recording ? '#fca5a5' : '#e2e8f0'}`,
+          display: 'flex', alignItems: 'center', gap: '12px',
           transform: recording ? 'scale(0.97)' : 'scale(1)',
+          transition: 'transform 0.1s ease, background 0.15s ease',
         }}
       >
-        {recording ? <MicOff size={28} color="#dc2626" /> : <Mic size={28} color="#16a34a" />}
-        <div className="flex flex-col items-start">
-          <span style={{ fontSize: '1.1rem', fontWeight: 800, color: recording ? '#dc2626' : '#16a34a' }}>
-            {recording ? '🔴 Aufnahme läuft...' : '🎤 Sprachnachricht'}
-          </span>
-          <span style={{ fontSize: '0.9rem', color: recording ? '#dc2626' : '#166534' }}>
+        {recording
+          ? <MicOff size={22} color="#dc2626" strokeWidth={2} />
+          : <Mic size={22} color="#8892a4" strokeWidth={2} />
+        }
+        <div>
+          <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 700, color: recording ? '#dc2626' : '#1a1a2e' }}>
+            {recording ? 'Aufnahme läuft...' : 'Sprachnachricht'}
+          </p>
+          <p style={{ margin: 0, fontSize: '0.72rem', fontWeight: 500, color: '#8892a4' }}>
             {recording ? 'Loslassen zum Senden' : 'Gedrückt halten'}
-          </span>
+          </p>
         </div>
       </button>
     </div>
@@ -167,18 +215,20 @@ function ContactCard({ contact }: { contact: Contact }) {
 
 export function ContactsScreen({ contacts, onBack }: ContactsScreenProps) {
   return (
-    <div className="screen">
-      <Header title="👥 Kontakte" onBack={onBack} />
-      <div className="scroll-zone" style={{ padding: '12px 16px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+    <div className="screen" style={{ background: '#f8fffe' }}>
+      <Header title="Kontakte" onBack={onBack} />
+      <div className="scroll-zone" style={{ padding: '14px 16px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {contacts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 gap-4">
-            <span style={{ fontSize: '4rem' }}>👥</span>
-            <p style={{ fontSize: '1.2rem', color: '#1a4a44', textAlign: 'center', lineHeight: 1.6 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', paddingTop: '60px', gap: '16px' }}>
+            <div style={{ width: '80px', height: '80px', borderRadius: '24px', background: '#e8fff8', border: '2px solid #a7f3d0', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ fontSize: '2.5rem' }}>👥</span>
+            </div>
+            <p style={{ fontSize: '1.05rem', fontWeight: 600, color: '#8892a4', textAlign: 'center', lineHeight: 1.6, margin: 0 }}>
               Noch keine Kontakte.{'\n'}Bitte in den Einstellungen hinzufügen.
             </p>
           </div>
         ) : (
-          contacts.sort((a, b) => a.order - b.order).map(c => <ContactCard key={c.id} contact={c} />)
+          contacts.sort((a, b) => a.order - b.order).map((c, i) => <ContactCard key={c.id} contact={c} index={i} />)
         )}
       </div>
     </div>

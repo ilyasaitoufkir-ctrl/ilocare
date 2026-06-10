@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Phone, AlertTriangle, CheckCircle } from 'lucide-react'
 import { Header } from '../components/Header'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useLocation } from '../hooks/useLocation'
@@ -22,6 +23,8 @@ function openSMS(phones: string[], body: string) {
   window.location.href = `sms:${numbers}?body=${encodeURIComponent(body)}`
 }
 
+const CARD_SHADOW = '0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04)'
+
 export function EmergencyScreen({ contacts, userName, onBack }: EmergencyScreenProps) {
   const [uiState, setUiState] = useState<UIState>('idle')
   const [lastOk, setLastOk] = useState(localStorage.getItem('ilocare_last_ok'))
@@ -34,20 +37,15 @@ export function EmergencyScreen({ contacts, userName, onBack }: EmergencyScreenP
   async function handleSOSConfirmed() {
     setSosActive(true)
     setUiState('calling-sos')
-
     let locationText = 'Standort nicht ermittelbar'
     try {
       const pos = await getLocation()
       locationText = pos.mapsUrl
     } catch { /* GPS not available */ }
-
     const msg = `🚨 NOTFALL! ${userName} braucht SOFORT Hilfe!\n📍 Standort: ${locationText}\n⏰ ${getTime()} Uhr`
     openSMS(allPhones, msg)
-
     setTimeout(() => {
-      if (emergencyContact?.phone) {
-        window.location.href = `tel:${emergencyContact.phone}`
-      }
+      if (emergencyContact?.phone) window.location.href = `tel:${emergencyContact.phone}`
     }, 2000)
   }
 
@@ -55,22 +53,20 @@ export function EmergencyScreen({ contacts, userName, onBack }: EmergencyScreenP
     const t = getTime()
     setLastOk(t)
     localStorage.setItem('ilocare_last_ok', t)
-    const msg = `✅ ${userName} geht es gut – ${t} Uhr`
-    openSMS(allPhones, msg)
+    openSMS(allPhones, `✅ ${userName} geht es gut – ${t} Uhr`)
     setUiState('done-ok')
     setTimeout(() => setUiState('idle'), 5000)
   }
 
   function handleNotGoodConfirmed() {
-    const msg = `⚠️ ${userName} fühlt sich heute nicht gut. – ${getTime()} Uhr`
-    openSMS(allPhones, msg)
+    openSMS(allPhones, `⚠️ ${userName} fühlt sich heute nicht gut. – ${getTime()} Uhr`)
     setUiState('done-notgood')
     setTimeout(() => setUiState('idle'), 5000)
   }
 
   return (
-    <div className="screen">
-      <Header title="🆘 Notfall" onBack={onBack} />
+    <div className="screen" style={{ background: '#f8fffe' }}>
+      <Header title="Notfall" onBack={onBack} />
 
       {uiState === 'confirm-ok' && (
         <ConfirmDialog message="Bist du sicher, dass es dir gut geht? ✅" onYes={handleOkConfirmed} onNo={() => setUiState('idle')} />
@@ -85,101 +81,170 @@ export function EmergencyScreen({ contacts, userName, onBack }: EmergencyScreenP
         <ConfirmDialog message="🚨 LETZTE BESTÄTIGUNG! Familie + Notrufnummer werden sofort kontaktiert!" onYes={handleSOSConfirmed} onNo={() => setUiState('idle')} />
       )}
 
-      <div className="scroll-zone" style={{ padding: '16px 20px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      <div className="scroll-zone" style={{ padding: '16px', paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)', display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
-        {/* Letzter OK Status */}
+        {/* Status Messages */}
         {lastOk && uiState === 'idle' && (
-          <div className="rounded-2xl px-5 py-3 text-center" style={{ backgroundColor: '#f0fdf4', border: '2px solid #86efac' }}>
-            <p style={{ fontSize: '1rem', color: '#166534', margin: 0, fontWeight: 600 }}>
-              ✅ Letzter OK-Status heute um {lastOk} Uhr
+          <div style={{ borderRadius: '18px', padding: '14px 18px', background: '#f0fdf8', border: '1.5px solid #a7f3d0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <CheckCircle size={20} color="#00c896" strokeWidth={2} />
+            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600, color: '#059669' }}>
+              Letzter OK-Status heute um {lastOk} Uhr
             </p>
           </div>
         )}
 
-        {/* SOS aktiv */}
         {uiState === 'calling-sos' && (
-          <div
-            className="rounded-3xl py-6 text-center"
-            style={{ backgroundColor: '#fef2f2', border: '4px solid #ef4444', animation: 'pulse 1s infinite' }}
-          >
-            <p style={{ fontSize: '1.4rem', fontWeight: 900, color: '#dc2626', margin: 0 }}>
-              🚨 NOTFALL AUSGELÖST!
+          <div style={{
+            borderRadius: '24px', padding: '24px', textAlign: 'center',
+            background: '#fff0f0', border: '2px solid #fca5a5',
+          }}>
+            <AlertTriangle size={36} color="#dc2626" style={{ margin: '0 auto 10px' }} />
+            <p style={{ margin: '0 0 6px', fontSize: '1.3rem', fontWeight: 900, color: '#dc2626', letterSpacing: '-0.02em' }}>
+              NOTFALL AUSGELÖST!
             </p>
-            <p style={{ fontSize: '1rem', color: '#dc2626', margin: '8px 0 0' }}>
-              {gpsLoading ? '📍 GPS wird ermittelt...' : '📱 Notfallkontakt wird angerufen...'}
+            <p style={{ margin: 0, fontSize: '0.9rem', fontWeight: 500, color: '#dc2626' }}>
+              {gpsLoading ? 'GPS wird ermittelt...' : 'Notfallkontakt wird angerufen...'}
             </p>
           </div>
         )}
 
-        {/* Done OK */}
         {uiState === 'done-ok' && (
-          <div className="rounded-3xl py-6 text-center" style={{ backgroundColor: '#dcfce7', border: '3px solid #4ade80' }}>
-            <p style={{ fontSize: '1.3rem', fontWeight: 800, color: '#166534', margin: 0 }}>
-              ✅ Familie wurde informiert!<br />„{userName} geht es gut"
+          <div style={{ borderRadius: '24px', padding: '24px', textAlign: 'center', background: '#f0fdf8', border: '1.5px solid #a7f3d0', boxShadow: CARD_SHADOW }}>
+            <p style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#059669', letterSpacing: '-0.02em' }}>
+              Familie wurde informiert! ✅{'\n'}„{userName} geht es gut"
             </p>
           </div>
         )}
 
-        {/* Done not good */}
         {uiState === 'done-notgood' && (
-          <div className="rounded-3xl py-6 text-center" style={{ backgroundColor: '#fef9c3', border: '3px solid #fde047' }}>
-            <p style={{ fontSize: '1.3rem', fontWeight: 800, color: '#92400e', margin: 0 }}>
-              ⚠️ Familie wurde benachrichtigt!
+          <div style={{ borderRadius: '24px', padding: '24px', textAlign: 'center', background: '#fffbeb', border: '1.5px solid #fcd34d', boxShadow: CARD_SHADOW }}>
+            <p style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#d97706', letterSpacing: '-0.02em' }}>
+              Familie wurde benachrichtigt! ⚠️
             </p>
           </div>
         )}
 
-        {/* ✅ OK Button */}
-        {!sosActive && (
-          <button
-            onClick={() => setUiState('confirm-ok')}
-            className="w-full flex flex-col items-center justify-center rounded-3xl active:scale-95 transition-all shadow-lg"
-            style={{ backgroundColor: '#4ade80', border: '4px solid #16a34a', minHeight: '130px', padding: '20px' }}
-          >
-            <span style={{ fontSize: '3rem', lineHeight: 1 }}>✅</span>
-            <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#14532d', marginTop: '10px' }}>
-              Mir geht es gut
-            </span>
-            <span style={{ fontSize: '1rem', color: '#166534', marginTop: '4px' }}>Familie per SMS informieren</span>
-          </button>
-        )}
-
-        {/* 🟡 Nicht gut Button */}
-        {!sosActive && (
-          <button
-            onClick={() => setUiState('confirm-notgood')}
-            className="w-full flex flex-col items-center justify-center rounded-3xl active:scale-95 transition-all shadow-lg"
-            style={{ backgroundColor: '#fde047', border: '4px solid #ca8a04', minHeight: '130px', padding: '20px' }}
-          >
-            <span style={{ fontSize: '3rem', lineHeight: 1 }}>😔</span>
-            <span style={{ fontSize: '1.6rem', fontWeight: 900, color: '#78350f', marginTop: '10px' }}>
-              Mir geht es nicht gut
-            </span>
-            <span style={{ fontSize: '1rem', color: '#92400e', marginTop: '4px' }}>Familie benachrichtigen</span>
-          </button>
-        )}
-
-        {/* 🔴 SOS Button */}
+        {/* 🔴 Large SOS Button */}
         {!sosActive && (
           <button
             onClick={() => setUiState('sos-1')}
-            className="w-full flex flex-col items-center justify-center rounded-3xl shadow-2xl"
-            style={{ backgroundColor: '#ef4444', border: '5px solid #991b1b', minHeight: '160px', padding: '24px' }}
+            className="sos-pulse"
+            style={{
+              width: '100%', borderRadius: '32px',
+              background: 'linear-gradient(135deg, #ff4757 0%, #c0392b 100%)',
+              minHeight: '160px',
+              display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: '10px',
+              border: '2px solid rgba(255,255,255,0.3)',
+            }}
           >
-            <span style={{ fontSize: '3.5rem', lineHeight: 1 }}>🚨</span>
-            <span style={{ fontSize: '2rem', fontWeight: 900, color: '#ffffff', marginTop: '10px', letterSpacing: '2px' }}>
+            <AlertTriangle size={42} color="#ffffff" strokeWidth={2.5} />
+            <p style={{
+              margin: 0, fontSize: '2rem', fontWeight: 900, color: '#ffffff',
+              letterSpacing: '0.04em',
+            }}>
               SOS – NOTRUF
-            </span>
-            <span style={{ fontSize: '1rem', color: '#fecaca', marginTop: '6px', textAlign: 'center' }}>
+            </p>
+            <p style={{ margin: 0, fontSize: '0.85rem', fontWeight: 500, color: 'rgba(255,255,255,0.85)', textAlign: 'center', lineHeight: 1.4 }}>
               GPS-Standort + SMS an Familie{'\n'}Notfallkontakt wird automatisch angerufen
-            </span>
+            </p>
           </button>
         )}
 
-        {/* GPS Hinweis */}
-        <div className="rounded-2xl px-4 py-3" style={{ backgroundColor: 'rgba(255,255,255,0.88)', border: '2px solid #b5e3e3' }}>
-          <p style={{ fontSize: '0.9rem', color: '#1a4a44', margin: 0, lineHeight: 1.5, textAlign: 'center' }}>
-            📍 Beim SOS-Alarm wird dein GPS-Standort automatisch mitgeschickt.
+        {/* ✅ Mir geht es gut */}
+        {!sosActive && (
+          <button
+            onClick={() => setUiState('confirm-ok')}
+            style={{
+              width: '100%', borderRadius: '24px',
+              background: 'linear-gradient(135deg, #00c896 0%, #00a67e 100%)',
+              minHeight: '100px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px',
+              border: '1.5px solid rgba(255,255,255,0.4)',
+              boxShadow: '0 8px 28px rgba(0,200,150,0.35)',
+            }}
+          >
+            <CheckCircle size={32} color="#ffffff" strokeWidth={2.5} />
+            <div style={{ textAlign: 'left' }}>
+              <p style={{ margin: '0 0 3px', fontSize: '1.2rem', fontWeight: 900, color: '#ffffff', letterSpacing: '-0.02em' }}>
+                Mir geht es gut
+              </p>
+              <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 500, color: 'rgba(255,255,255,0.85)' }}>
+                Familie per SMS informieren
+              </p>
+            </div>
+          </button>
+        )}
+
+        {/* 🟡 Nicht gut */}
+        {!sosActive && (
+          <button
+            onClick={() => setUiState('confirm-notgood')}
+            style={{
+              width: '100%', borderRadius: '24px',
+              background: '#ffffff',
+              minHeight: '90px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '14px',
+              border: '1.5px solid #fcd34d',
+              boxShadow: CARD_SHADOW,
+            }}
+          >
+            <span style={{ fontSize: '2rem', lineHeight: 1 }}>😔</span>
+            <div style={{ textAlign: 'left' }}>
+              <p style={{ margin: '0 0 3px', fontSize: '1.1rem', fontWeight: 800, color: '#1a1a2e', letterSpacing: '-0.02em' }}>
+                Mir geht es nicht gut
+              </p>
+              <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 500, color: '#8892a4' }}>
+                Familie benachrichtigen
+              </p>
+            </div>
+          </button>
+        )}
+
+        {/* Emergency Contacts */}
+        {contacts.length > 0 && (
+          <div style={{ borderRadius: '24px', overflow: 'hidden', background: '#ffffff', boxShadow: CARD_SHADOW, border: '1px solid rgba(255,255,255,0.8)' }}>
+            <div style={{ padding: '14px 18px', borderBottom: '1px solid rgba(0,0,0,0.04)' }}>
+              <p style={{ margin: 0, fontSize: '0.78rem', fontWeight: 700, color: '#8892a4', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                Notfallkontakte
+              </p>
+            </div>
+            {contacts.slice(0, 3).map(c => (
+              <button
+                key={c.id}
+                onClick={() => { if (c.phone) window.location.href = `tel:${c.phone}` }}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                  padding: '14px 18px',
+                  background: 'transparent', border: 'none',
+                  borderBottom: '1px solid rgba(0,0,0,0.04)',
+                  textAlign: 'left',
+                }}
+              >
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: '0.95rem', fontWeight: 700, color: '#1a1a2e' }}>
+                    {c.name}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.8rem', fontWeight: 500, color: '#8892a4' }}>
+                    {c.phone}
+                  </p>
+                </div>
+                <div style={{
+                  width: '40px', height: '40px', borderRadius: '50%',
+                  background: '#e8fff8', border: '1.5px solid #a7f3d0',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                }}>
+                  <Phone size={18} color="#00c896" strokeWidth={2} />
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* GPS note */}
+        <div style={{ borderRadius: '18px', padding: '14px 18px', background: '#f8fffe', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+          <p style={{ margin: 0, fontSize: '0.82rem', fontWeight: 500, color: '#8892a4', lineHeight: 1.6 }}>
+            Beim SOS-Alarm wird dein GPS-Standort automatisch mitgeschickt.
           </p>
         </div>
       </div>

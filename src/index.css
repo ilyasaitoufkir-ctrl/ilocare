@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 /* ── Reset & Fixed Layout ──────────────────────────────────────────────────── */
@@ -14,10 +15,12 @@ html, body {
   height: 100% !important;
   margin: 0;
   padding: 0;
-  background: #f0faf5 !important;
+  background: #f8fffe !important;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
   user-select: none;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
 
 #root {
@@ -29,21 +32,22 @@ html, body {
   display: flex;
   flex-direction: column;
   background: transparent;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
 }
 
-/* ── Screen base – every screen fills viewport exactly ───────────────────── */
+/* ── Screen base ─────────────────────────────────────────────────────────── */
 .screen {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  background: transparent;
+  background: #f8fffe;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Scrollable zone ONLY inside .scroll-zone */
+/* ── Scroll zone ─────────────────────────────────────────────────────────── */
 .scroll-zone {
   flex: 1;
   overflow-y: auto;
@@ -52,24 +56,40 @@ html, body {
   touch-action: pan-y;
 }
 
-/* ── Glass card – reusable white glassmorphism ────────────────────────────── */
+/* ── Premium Glass ───────────────────────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.88);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1.5px solid rgba(255, 255, 255, 0.6);
-  box-shadow: 0 4px 24px rgba(42, 157, 143, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.8);
 }
 
-/* ── Global Typography & Controls ─────────────────────────────────────────── */
+/* ── Premium Card Shadow ─────────────────────────────────────────────────── */
+.card-shadow {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Typography ──────────────────────────────────────────────────────────── */
 html { font-size: 16px; }
 
-input, textarea, select {
-  font-size: 18px !important;
-  -webkit-appearance: none;
-  border-radius: 0;
+h1, h2, h3, h4 {
+  font-family: 'Inter', -apple-system, sans-serif;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
 }
 
+p, span, label {
+  font-family: 'Inter', -apple-system, sans-serif;
+  line-height: 1.5;
+}
+
+input, textarea, select {
+  font-size: 16px !important;
+  font-family: 'Inter', -apple-system, sans-serif;
+  -webkit-appearance: none;
+}
+
+/* ── Buttons ─────────────────────────────────────────────────────────────── */
 button {
   cursor: pointer;
   -webkit-appearance: none;
@@ -78,13 +98,42 @@ button {
   touch-action: manipulation;
   -webkit-user-select: none;
   user-select: none;
+  font-family: 'Inter', -apple-system, sans-serif;
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-button:active { transform: scale(0.96); transition: transform 0.08s ease; }
+button:active {
+  transform: scale(0.95);
+}
+
+button:disabled {
+  opacity: 0.5;
+  transform: none;
+}
 
 a { -webkit-user-select: none; user-select: none; touch-action: manipulation; }
 
-/* ── Safe area helpers ────────────────────────────────────────────────────── */
+/* ── SOS Pulse Animation ─────────────────────────────────────────────────── */
+@keyframes sos-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0.5); }
+  70%  { box-shadow: 0 0 0 24px rgba(255, 71, 87, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 71, 87, 0); }
+}
+
+.sos-pulse {
+  animation: sos-ring 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* ── Mint pulse ──────────────────────────────────────────────────────────── */
+@keyframes mint-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(0, 200, 150, 0.4); }
+  70%  { box-shadow: 0 0 0 16px rgba(0, 200, 150, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 200, 150, 0); }
+}
+
+/* ── Safe area helpers ───────────────────────────────────────────────────── */
 .safe-top    { padding-top:    env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
 .safe-left   { padding-left:   env(safe-area-inset-left); }

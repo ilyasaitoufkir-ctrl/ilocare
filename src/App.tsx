@@ -302,26 +302,12 @@ export default function App() {
         contacts={store.state.contacts}
         checkedInToday={checkedToday}
         lastCheckInTime={lastCheckInTime}
+        bloodType={store.state.healthRecord.bloodType}
+        fallDetectionEnabled={fallDetectionEnabled}
+        onToggleFallDetection={() => setFallDetectionEnabled(f => !f)}
         onNavigate={navigate}
         onOkSend={handleOkSend}
       />
-      {/* Fall Detection Toggle (kleiner Button oben rechts) */}
-      <button
-        onClick={() => setFallDetectionEnabled(f => !f)}
-        className="fixed z-40 flex items-center justify-center rounded-full"
-        style={{
-          bottom: 'calc(env(safe-area-inset-bottom) + 16px)',
-          right: '16px',
-          width: '56px',
-          height: '56px',
-          backgroundColor: fallDetectionEnabled ? '#ef4444' : '#f8e8e8',
-          border: `3px solid ${fallDetectionEnabled ? '#991b1b' : '#e8a0a0'}`,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        }}
-        title={fallDetectionEnabled ? 'Sturzerkennung aus' : 'Sturzerkennung an'}
-      >
-        <span style={{ fontSize: '1.5rem' }}>{fallDetectionEnabled ? '🛡️' : '📱'}</span>
-      </button>
     </>
   )
 }

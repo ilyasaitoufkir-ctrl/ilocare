@@ -14,7 +14,7 @@ html, body {
   height: 100% !important;
   margin: 0;
   padding: 0;
-  background: linear-gradient(160deg, #1a7a6e 0%, #2a9d8f 25%, #52d68a 65%, #8fe03a 100%) fixed !important;
+  background: #f0faf5 !important;
   -webkit-font-smoothing: antialiased;
   overscroll-behavior: none;
   user-select: none;

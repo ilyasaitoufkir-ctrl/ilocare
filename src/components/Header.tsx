@@ -12,35 +12,35 @@ export function Header({ title, onBack, rightAction }: HeaderProps) {
     <div
       className="flex items-center justify-between"
       style={{
-        background: 'linear-gradient(135deg, #1e8c7e, #2a9d8f 50%, #3db88a)',
-        padding: '12px 16px',
+        background: '#ffffff',
+        padding: '10px 16px',
         flexShrink: 0,
-        boxShadow: '0 2px 20px rgba(30, 140, 126, 0.35)',
+        boxShadow: '0 2px 12px rgba(77,184,158,0.15)',
+        borderBottom: '1px solid #e6f7f2',
       }}
     >
-      <div style={{ width: '52px' }}>
+      <div style={{ width: '48px' }}>
         {onBack && (
           <button
             onClick={onBack}
-            className="flex items-center justify-center rounded-2xl"
+            className="flex items-center justify-center"
             style={{
-              width: '52px', height: '52px',
-              backgroundColor: 'rgba(255,255,255,0.22)',
-              border: '1.5px solid rgba(255,255,255,0.45)',
+              width: '44px', height: '44px', borderRadius: '12px',
+              backgroundColor: '#f0faf5',
+              border: '1.5px solid #c8ede4',
             }}
           >
-            <ArrowLeft size={26} color="#ffffff" />
+            <ArrowLeft size={22} color="#4db89e" />
           </button>
         )}
       </div>
       <h1 style={{
-        fontSize: '1.5rem', fontWeight: 800, color: '#ffffff',
+        fontSize: '1.2rem', fontWeight: 800, color: '#2d3748',
         margin: 0, textAlign: 'center',
-        textShadow: '0 1px 6px rgba(0,0,0,0.12)',
       }}>
         {title}
       </h1>
-      <div style={{ width: '52px', display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ width: '48px', display: 'flex', justifyContent: 'flex-end' }}>
         {rightAction}
       </div>
     </div>
